@@ -1428,6 +1428,66 @@
 
 <script>
   /* ============================================
+     Lifecycle logger
+     ============================================
+     Single namespace for every meaningful event in this flow. The aim
+     is that reading the console afterwards lets you reconstruct what
+     the user did and what the system did in response — useful for:
+       - diagnosing call-flow oddities (the "stuck on dialling after
+         voicemail" bug we hit earlier)
+       - understanding where users drop off
+       - confirming a deployment is wired up correctly
+
+     Categories:
+       session   — page load, rehydration, abandonment
+       step      — step transitions
+       form      — field validation outcomes, submissions
+       calendar  — calendar render, slot selection, timezone
+       call      — every stage of the c2c call lifecycle
+       persist   — what we send to connect.doorflow.com
+       attendee  — additional attendee adds/removes
+       bot       — bot check decisions
+       widget    — c2c widget-specific events
+
+     Levels:
+       log    — normal lifecycle (happy path)
+       warn   — non-error oddities (poll retry, fallback used,
+                unrecognised API string)
+       error  — genuine failures (call init failed, status timeout)
+
+     Toggle off in the browser:  localStorage.setItem('doorflow:debug', 'false')
+     Toggle back on:             localStorage.removeItem('doorflow:debug')
+     Errors are always shown regardless of the flag. */
+  const LOG = (() => {
+    function isDebug() {
+      try {
+        const v = localStorage.getItem("doorflow:debug");
+        return v === null ? true : v !== "false";
+      } catch (e) { return true; }
+    }
+    function emit(level, category, event, payload) {
+      // Always show errors. Suppress others when debug is off.
+      if (level !== "error" && !isDebug()) return;
+      const tag = `%c[doorflow:${category}]%c ${event}`;
+      const tagStyle = level === "error" ? "color:#c4392b;font-weight:600"
+                     : level === "warn"  ? "color:#b3541e;font-weight:600"
+                     :                     "color:#1c7e63;font-weight:600";
+      const fn = level === "error" ? console.error
+               : level === "warn"  ? console.warn
+               :                     console.log;
+      if (payload !== undefined) fn(tag, tagStyle, "color:inherit", payload);
+      else                       fn(tag, tagStyle, "color:inherit");
+    }
+    return {
+      log:   (cat, ev, p) => emit("log",   cat, ev, p),
+      warn:  (cat, ev, p) => emit("warn",  cat, ev, p),
+      error: (cat, ev, p) => emit("error", cat, ev, p),
+    };
+  })();
+
+  LOG.log("session", "boot", { ua: navigator.userAgent, href: location.href });
+
+  /* ============================================
      Session persistence
      ============================================
      The form lives in sessionStorage under SESSION_KEY. This survives:
@@ -1458,6 +1518,17 @@
   }
 
   const restored = safeSessionGet();
+  if (restored) {
+    LOG.log("session", "rehydrated", {
+      step: restored.step,
+      project: restored.project,
+      hasForm: !!(restored.fname || restored.email),
+      hasBooking: !!(restored.selectedDate && restored.selectedSlot),
+      savedAt: restored.savedAt,
+    });
+  } else {
+    LOG.log("session", "fresh", {});
+  }
 
   /* ============================================
      State
@@ -1554,7 +1625,7 @@
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
       ...payload,
     };
-    console.log("[connect.doorflow.com]", stage, body);
+    LOG.log("persist", stage, body);
 
     // Save locally regardless — this is what keeps the form recoverable
     // across reloads.
@@ -1579,9 +1650,19 @@
      Bot defenses
      ============================================ */
   function passesBotChecks() {
-    if (document.getElementById("hp_company_url").value.trim()) return false;
-    if (Date.now() - state.formLoadedAt < 2500) return false;
-    if (!state.jsToken) return false;
+    if (document.getElementById("hp_company_url").value.trim()) {
+      LOG.warn("bot", "rejected", { reason: "honeypot_filled" });
+      return false;
+    }
+    const elapsed = Date.now() - state.formLoadedAt;
+    if (elapsed < 2500) {
+      LOG.warn("bot", "rejected", { reason: "too_fast", elapsedMs: elapsed });
+      return false;
+    }
+    if (!state.jsToken) {
+      LOG.warn("bot", "rejected", { reason: "no_js_token" });
+      return false;
+    }
     return true;
   }
 
@@ -1607,6 +1688,7 @@
   }
 
   function setStep(n) {
+    const from = state.step;
     state.step = n;
     panels.forEach(p => p.classList.toggle("is-active", String(p.dataset.panel) === String(n)));
     progressFill.style.width = (Math.min(n, 3) / 3 * 100) + "%";
@@ -1614,6 +1696,7 @@
     if (body) body.scrollTop = 0;
     refreshHeaderContext();
     saveSession();
+    LOG.log("step", "transitioned", { from, to: n });
   }
 
   document.querySelectorAll("[data-back]").forEach(b => {
@@ -1719,6 +1802,7 @@
       state.project = el.dataset.value;
       nextBtn1.disabled = false;
       saveSession();
+      LOG.log("form", "project_selected", { project: state.project });
 
       const callout = document.getElementById("installerCallout");
       if (state.project === "help") {
@@ -2215,9 +2299,24 @@
     setPhoneError(phoneErrorReason(state.phoneRaw));
     setFieldError("ext", !validateExt(state.ext));
     setFieldError("company", !validateCompany(state.company));
-    if (!validateEmail(state.email) || !validateE164(state.phoneE164) || !validateExt(state.ext) || !validateCompany(state.company)) return;
+
+    const failures = [];
+    if (!validateEmail(state.email))      failures.push("email");
+    if (!validateE164(state.phoneE164))   failures.push("phone");
+    if (!validateExt(state.ext))          failures.push("ext");
+    if (!validateCompany(state.company))  failures.push("company");
+    if (failures.length) {
+      LOG.warn("form", "submit_blocked_by_validation", { failures });
+      return;
+    }
     if (!passesBotChecks()) return;
 
+    LOG.log("form", "step2_submitted", {
+      project: state.project,
+      hasCompany: !!state.company,
+      phoneCountry: state.phoneCountry,
+      hasExt: !!state.ext,
+    });
     persist("contact_captured", {
       fname: state.fname, lname: state.lname,
       company: state.company,
@@ -2335,6 +2434,7 @@
         saveSession();
         refreshTzChip();
         tzPopover.hidden = true;
+        LOG.log("calendar", "timezone_changed", { from: browserTimezone, to: tz });
       });
       tzPopover.appendChild(row);
     });
@@ -2404,6 +2504,7 @@
         state.selectedSlot = null;
         nextBtn3.disabled = true;
         saveSession();
+        LOG.log("calendar", "date_selected", { date: date.toISOString().slice(0,10) });
         renderCalendar();
         renderSlots();
       });
@@ -2432,6 +2533,11 @@
         state.selectedSlot = t;
         nextBtn3.disabled = false;
         saveSession();
+        LOG.log("calendar", "slot_selected", {
+          date: state.selectedDate.toISOString().slice(0,10),
+          slot: t,
+          timezone: state.selectedTimezone || browserTimezone,
+        });
         renderSlots();
       });
       slotsGrid.appendChild(b);
@@ -2454,6 +2560,12 @@
 
   nextBtn3.addEventListener("click", () => {
     if (!state.selectedDate || !state.selectedSlot) return;
+    LOG.log("calendar", "meeting_confirmed", {
+      date: state.selectedDate.toISOString().slice(0, 10),
+      slot: state.selectedSlot,
+      timezone: activeTimezone(),
+      project: state.project,
+    });
     persist("meeting_booked", {
       project: state.project,
       date: state.selectedDate.toISOString().slice(0, 10),
@@ -2527,6 +2639,7 @@
   let callbackNextOpen = null;
 
   async function checkCallbackAvailability() {
+    LOG.log("call", "availability_check", { widgetId: C2C_WIDGET });
     try {
       const res = await fetch(`${C2C_HOST}/api/v1/widgets/${C2C_WIDGET}`);
       if (!res.ok) throw new Error("Widget status fetch failed: " + res.status);
@@ -2534,10 +2647,15 @@
       const status = data.status || {};
       callbackAvailable = !!(status.active && status.available);
       callbackNextOpen = status.time || null;
+      LOG.log("call", "availability_resolved", {
+        active: !!status.active,
+        available: !!status.available,
+        nextOpen: callbackNextOpen,
+      });
     } catch (e) {
       // If we can't reach the API, assume callable rather than blocking.
       // Worst case the API call below fails and we fall back to the widget.
-      console.warn("Couldn't check call-back availability:", e);
+      LOG.warn("call", "availability_check_failed", { error: String(e), assumingAvailable: true });
       callbackAvailable = true;
     }
     refreshCallbackButton();
@@ -2585,6 +2703,11 @@
   /* Submit call-back. Returns the call_request id on success or
      throws (with the API's own error list joined into the message). */
   async function initiateCallBack({ first_name, last_name, company, user_phone }) {
+    LOG.log("call", "request_sent", {
+      endpoint: `${C2C_HOST}/api/v1/call`,
+      widget_id: C2C_WIDGET,
+      first_name, last_name, company, user_phone,
+    });
     const res = await fetch(`${C2C_HOST}/api/v1/call`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -2594,6 +2717,12 @@
       }),
     });
     const data = await res.json().catch(() => null);
+
+    LOG.log("call", "request_response", {
+      httpStatus: res.status,
+      ok: res.ok,
+      body: data,
+    });
 
     // The API uses two error shapes depending on the failure type:
     //   - 200 with { errors: [...] }       — validation failures
@@ -2613,6 +2742,7 @@
     if (!data || !data.id) {
       throw new Error("Unexpected response from call API");
     }
+    LOG.log("call", "request_accepted", { callRequestId: data.id });
     return data.id;
   }
 
@@ -2671,8 +2801,32 @@
     return cancellable ? "ringing" : "dialling";
   }
 
+  /* Classify a status string into a terminal outcome. The API doesn't
+     give us a clean enum — just human-readable strings like "Call
+     connected", "Sales declined", "Going to voicemail" — so we do
+     keyword matching. The classifications drive the UI state when
+     polling has ended (continue_polling: false).
+
+     Returns one of:
+       "success"   — call landed (live person OR voicemail counts)
+       "declined"  — sales side rejected
+       "no_answer" — nobody picked up
+       "busy"      — engaged
+       "unknown"   — we don't recognise the string */
+  function classifyTerminalStatus(statusStr) {
+    const s = (statusStr || "").toLowerCase();
+    if (s.includes("connected"))    return "success";
+    if (s.includes("voicemail") || s.includes("answerphone") || s.includes("answer machine")) return "success";
+    if (s.includes("declined") || s.includes("rejected"))  return "declined";
+    if (s.includes("no answer") || s.includes("unanswered") || s.includes("no-one"))  return "no_answer";
+    if (s.includes("busy") || s.includes("engaged"))       return "busy";
+    if (s.includes("cancelled"))    return "declined";   // user-initiated cancel comes via the cancel button, but defensive
+    return "unknown";
+  }
+
   async function pollLoop(callRequestId, attempt = 0) {
     if (attempt >= POLL_MAX) {
+      LOG.error("call", "poll_max_reached", { callRequestId, attempts: attempt });
       setCallOptionState({
         state: "failed",
         title: "Call request timed out",
@@ -2683,10 +2837,66 @@
     }
     try {
       const data = await fetchCallStatus(callRequestId);
+      LOG.log("call", `poll_${attempt + 1}`, {
+        callRequestId,
+        attempt: attempt + 1,
+        status: data.status,
+        cancellable: data.cancellable,
+        continue_polling: data.continue_polling,
+        full: data,
+      });
+
       const status = data.status || "Working on it…";
       const cancellable = !!data.cancellable;
       const connected = status === "Call connected";
+      const continuing = !!data.continue_polling;
 
+      // Terminal handling: if the API tells us not to keep polling,
+      // transition to a settled state regardless of what the status
+      // string is. Otherwise render the in-flight state.
+      if (!continuing) {
+        const outcome = classifyTerminalStatus(status);
+        LOG.log("call", "poll_terminal", {
+          callRequestId,
+          finalStatus: status,
+          classified: outcome,
+          totalPolls: attempt + 1,
+        });
+        if (outcome === "success") {
+          const isVoicemail = /voicemail|answerphone|answer machine/i.test(status);
+          setCallOptionState({
+            state: "connected",
+            title: isVoicemail ? "Off to voicemail" : "You're connected",
+            desc: isVoicemail
+              ? "Looks like our team can't pick up right now — we sent the call to voicemail so you can leave a message. We'll get back to you."
+              : "Have a great call. We'll log everything for follow-up.",
+            actions: ["close"],
+          });
+        } else if (outcome === "declined" || outcome === "no_answer" || outcome === "busy") {
+          const friendly = outcome === "declined"  ? "Our team couldn't take the call right now."
+                         : outcome === "no_answer" ? "Looks like nobody picked up."
+                         :                           "The line was busy.";
+          setCallOptionState({
+            state: "failed",
+            title: friendly,
+            desc: "Sorry about that — try again, or pick a time below and we'll come prepared.",
+            actions: ["retry", "close"],
+          });
+        } else {
+          // Unknown terminal state — log a warning so we know to add it
+          // to classifyTerminalStatus, and surface the API's string.
+          LOG.warn("call", "poll_terminal_unknown_status", { status });
+          setCallOptionState({
+            state: "cancelled",
+            title: status || "Call ended",
+            desc: "If that wasn't the outcome you were hoping for, you can try again or book a slot below.",
+            actions: ["retry", "close"],
+          });
+        }
+        return;   // stop polling
+      }
+
+      // Still in flight.
       setCallOptionState({
         state: statusToCallState(status, cancellable, connected),
         title: connected ? "You're connected" : status,
@@ -2696,11 +2906,9 @@
         actions: connected ? ["close"] : (cancellable ? ["cancel"] : []),
       });
 
-      if (data.continue_polling) {
-        activePollHandle = setTimeout(() => pollLoop(callRequestId, attempt + 1), POLL_EVERY);
-      }
+      activePollHandle = setTimeout(() => pollLoop(callRequestId, attempt + 1), POLL_EVERY);
     } catch (e) {
-      console.warn("Poll error:", e);
+      LOG.warn("call", "poll_error_retrying", { callRequestId, attempt, error: String(e) });
       // Transient network blips shouldn't kill the panel — just retry.
       activePollHandle = setTimeout(() => pollLoop(callRequestId, attempt + 1), POLL_EVERY);
     }
@@ -2712,13 +2920,23 @@
      since the element is role="button". */
   async function handleCallNowActivate() {
     const el = document.getElementById("callNowBtn");
-    if (!el || el.dataset.state !== "ready") return;
+    if (!el || el.dataset.state !== "ready") {
+      LOG.log("call", "activate_ignored", { currentState: el ? el.dataset.state : "no_element" });
+      return;
+    }
     if (!validateE164(state.phoneE164)) {
+      LOG.warn("call", "activate_no_phone", { phoneE164: state.phoneE164 });
       // Should not happen — defensively pop the widget so they can fix it.
       const w = window.callWidgetInstance;
       if (w && typeof w.open === "function") w.open();
       return;
     }
+
+    LOG.log("call", "activated", {
+      phone: state.phoneE164,
+      project: state.project,
+      hasCompany: !!state.company,
+    });
 
     const payload = {
       first_name: state.fname,
@@ -2744,13 +2962,10 @@
     try {
       const id = await initiateCallBack(payload);
       activeCallRequestId = id;
+      LOG.log("call", "polling_started", { callRequestId: id });
       pollLoop(id);
     } catch (err) {
-      console.error("Call-back init failed:", err);
-      // The API's own error message is the most useful thing to show
-      // — "Domain not allowed", "Invalid phone format", etc. — but we
-      // wrap it in a friendly preamble so it doesn't read like a stack
-      // trace. Falls back to a generic message if there's no detail.
+      LOG.error("call", "init_failed", { error: String(err && err.message || err) });
       const apiMessage = (err && err.message) ? String(err.message) : "";
       const desc = apiMessage
         ? `Sorry — ${apiMessage}. Try again, or open the call form.`
@@ -2775,6 +2990,7 @@
   document.getElementById("cancelCallBtn").addEventListener("click", async (e) => {
     e.stopPropagation();   // don't bubble up to the parent's click handler
     if (!activeCallRequestId) return;
+    LOG.log("call", "cancel_requested", { callRequestId: activeCallRequestId });
     stopPolling();
     setCallOptionState({
       state: "dialling",
@@ -2784,6 +3000,7 @@
     });
     try {
       const data = await cancelCallRequest(activeCallRequestId);
+      LOG.log("call", "cancel_response", { callRequestId: activeCallRequestId, body: data });
       if (data && data.success) {
         setCallOptionState({
           state: "cancelled",
@@ -2793,6 +3010,7 @@
         });
         persist("callback_cancelled", { callRequestId: activeCallRequestId });
       } else {
+        LOG.warn("call", "cancel_rejected", { callRequestId: activeCallRequestId, body: data });
         setCallOptionState({
           state: "failed",
           title: "Couldn't cancel",
@@ -2801,6 +3019,7 @@
         });
       }
     } catch (e2) {
+      LOG.error("call", "cancel_failed", { callRequestId: activeCallRequestId, error: String(e2) });
       setCallOptionState({
         state: "failed",
         title: "Couldn't cancel",
@@ -2813,6 +3032,7 @@
 
   document.getElementById("closeCallBtn").addEventListener("click", (e) => {
     e.stopPropagation();
+    LOG.log("call", "panel_closed", { hadActiveRequest: !!activeCallRequestId });
     stopPolling();
     activeCallRequestId = null;
     refreshCallbackButton();   // back to ready/closed
@@ -2820,6 +3040,7 @@
 
   document.getElementById("retryCallBtn").addEventListener("click", (e) => {
     e.stopPropagation();
+    LOG.log("call", "retry_requested", {});
     refreshCallbackButton();
     // Slight delay before triggering — feels less violent than a no-flicker re-fire.
     setTimeout(handleCallNowActivate, 80);
@@ -2827,8 +3048,10 @@
 
   document.getElementById("openWidgetBtn").addEventListener("click", (e) => {
     e.stopPropagation();
+    LOG.log("call", "fallback_widget_opened", {});
     const w = window.callWidgetInstance;
     if (w && typeof w.open === "function") w.open();
+    else LOG.warn("call", "fallback_widget_unavailable", {});
   });
 
   /* Dial-us click — record this so we can match conversations to the
@@ -2836,6 +3059,11 @@
      just fire-and-forget a persistence event before the OS handler
      takes over. */
   document.getElementById("dialUsBtn").addEventListener("click", () => {
+    const supportNumber = SUPPORT_NUMBERS[pickSupportRegion()].e164;
+    LOG.log("call", "dial_us_clicked", {
+      region: pickSupportRegion(),
+      supportNumber,
+    });
     persist("dial_us_clicked", {
       project: state.project,
       fname: state.fname, lname: state.lname,
@@ -2845,7 +3073,7 @@
       phoneE164: state.phoneE164,
       phoneCountry: state.phoneCountry,
       extension: state.ext,
-      supportNumberDialled: SUPPORT_NUMBERS[pickSupportRegion()].e164,
+      supportNumberDialled: supportNumber,
     });
     // No preventDefault — let the tel: link do its thing.
   });
@@ -3154,6 +3382,7 @@ We'll call {phone} at the scheduled time. If anything changes, just reply to the
   }
 
   function persistAttendees(stage) {
+    LOG.log("attendee", stage, { count: state.attendees.length, attendees: state.attendees });
     persist(stage, {
       attendees: state.attendees,
       project: state.project,
@@ -3243,6 +3472,7 @@ We'll call {phone} at the scheduled time. If anything changes, just reply to the
      ============================================ */
   window.addEventListener("pagehide", () => {
     if (state.step < 4) {
+      LOG.log("session", "abandoned", { atStep: state.step });
       persist("session_abandoned", {
         atStep: state.step,
         project: state.project,
@@ -3256,6 +3486,8 @@ We'll call {phone} at the scheduled time. If anything changes, just reply to the
         selectedDate: state.selectedDate ? state.selectedDate.toISOString() : null,
         selectedSlot: state.selectedSlot,
       });
+    } else {
+      LOG.log("session", "completed", { ref: state.sessionId.slice(0, 8).toUpperCase() });
     }
   });
 </script>
