@@ -1074,12 +1074,77 @@
     .topbar { padding: 20px 32px; }
   }
 
+  /* ============================================
+     Mobile responsive — tighter spacing for narrow viewports.
+     Tested against iPhone 14 Pro at 393px.
+     ============================================ */
+  @media (max-width: 480px) {
+    .topbar { padding: 14px 16px; }
+    .stage  { padding: 18px 16px 0; }
+
+    /* Phone + ext row: stack on very narrow screens so the ext field
+       gets full-width tap area instead of squeezing the phone field. */
+    .form-row-phone {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    /* Calendar/booking card: trim padding so the day grid fills the
+       width comfortably. */
+    .booking-card { padding: 14px; }
+
+    /* Timezone popover: anchor to right edge of chip so it doesn't
+       overflow. Set explicit right:0 and override the absolute
+       positioning. The wrapper span is position:relative, so this
+       works as expected. */
+    .tz-popover {
+      right: 0;
+      left: auto;
+      min-width: 200px;
+      max-width: calc(100vw - 40px);
+    }
+
+    /* Time-slot grid: keep 3 columns but reduce gap. 2 cols would be
+       tappier but eats vertical space and makes the picker feel long. */
+    .slots { gap: 5px; }
+    .slot { padding: 10px 4px; font-size: 13px; }
+
+    /* "Other ways to talk" + attendee rows already stack via their
+       own grid-template rules below 540px. */
+
+    /* Confirmation card: trim row gap and font slightly. */
+    .confirm-card dl { column-gap: 12px; row-gap: 6px; font-size: 13.5px; }
+
+    /* Stage head: smaller margin so the form starts higher. */
+    .stage-head { margin-bottom: 18px; }
+
+    /* Confirm-actions row: stack the calendar links on tight widths
+       instead of cramming them onto one line. */
+    .confirm-actions-row { flex-wrap: wrap; gap: 8px; }
+  }
+
+  /* Belt-and-braces: never let any single element cause a horizontal
+     scroll. The page itself is overflow:hidden but inner elements
+     could still report a wider scrollWidth. */
+  .panel-body { overflow-x: hidden; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* Hide the c2c widget's floating "call us" bubble. We keep the
+     embed script loaded so window.callWidgetInstance is available as
+     a fallback (the "Open the call form" button uses it), but we
+     don't want the duplicate floating affordance — our inline call
+     option already covers it. */
+  .call-widget-button { display: none !important; }
+  .call-widget-modal { display: none; }
+  /* The widget's modal we DO want to show when the user clicks the
+     fallback link, so re-enable it when its .active class is set. */
+  .call-widget-modal.active { display: flex !important; }
 </style>
 </head>
 <body>
@@ -2043,6 +2108,15 @@
      Step 2 — wiring
      ============================================ */
   const form = document.getElementById("contactForm");
+  // Alias the named inputs onto the form object so we can use the
+  // concise `form.fname` syntax. Real browsers do this automatically
+  // via HTMLFormElement's named properties, but JSDOM (which we use
+  // for tests) doesn't, so we set them up explicitly. Using
+  // form.elements.X also works everywhere; this just keeps the
+  // call sites tidy.
+  ["fname", "lname", "company", "email", "phone", "ext"].forEach(name => {
+    if (!form[name]) form[name] = form.elements[name];
+  });
   const nextBtn2 = document.getElementById("nextBtn2");
   const phoneConfirm = document.getElementById("phoneConfirm");
   const phoneE164Display = document.getElementById("phoneE164Display");
@@ -2816,7 +2890,14 @@
   function classifyTerminalStatus(statusStr) {
     const s = (statusStr || "").toLowerCase();
     if (s.includes("connected"))    return "success";
+    // Voicemail variants — both explicit ("voicemail", "answerphone")
+    // and the indirect language the API sometimes uses ("leave us a
+    // message", "leave a message"). The latter caught us out in
+    // production once when a call routed straight to voicemail with
+    // a status like "We can't take your call at the moment. We'll
+    // call you now so that you can leave us a message."
     if (s.includes("voicemail") || s.includes("answerphone") || s.includes("answer machine")) return "success";
+    if (s.includes("leave us a message") || s.includes("leave a message"))  return "success";
     if (s.includes("declined") || s.includes("rejected"))  return "declined";
     if (s.includes("no answer") || s.includes("unanswered") || s.includes("no-one"))  return "no_answer";
     if (s.includes("busy") || s.includes("engaged"))       return "busy";
@@ -3490,6 +3571,20 @@ We'll call {phone} at the scheduled time. If anything changes, just reply to the
       LOG.log("session", "completed", { ref: state.sessionId.slice(0, 8).toUpperCase() });
     }
   });
+
+  /* Test hook — only fires when ?test=1 is in the URL. Exposes the
+     pure functions to window so the Node test runner can poke at
+     them via JSDOM. Guarded carefully: never runs in production
+     because the URL there won't have the test flag. */
+  if (typeof location !== "undefined" && location.search.includes("test=1")) {
+    window.__doorflowInternals = {
+      smartCapitalise, fixWord,
+      toE164, validateE164, phoneErrorReason, countryFromE164,
+      validateEmail, validateExt, validateCompany,
+      classifyTerminalStatus,
+      detectCountry,
+    };
+  }
 </script>
 
 </body>
