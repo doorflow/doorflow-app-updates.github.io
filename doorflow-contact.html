@@ -1527,7 +1527,24 @@
 
   /* ============================================
      Persistence stub
-     ============================================ */
+     ============================================
+     POSTs each meaningful step to connect.doorflow.com so partial
+     leads aren't lost. The endpoint is currently a stub — it returns
+     404 until you wire it up server-side.
+
+     During local development the network path produces noisy console
+     errors. To keep things quiet we skip the fetch entirely when we
+     detect a non-production host. The console.log still fires every
+     time so you can see what would have been sent.
+
+     PRODUCTION_HOSTS controls this — add your real domains there.
+     Anything else (localhost, file://, preview iframes, IP literals)
+     gets logged but not POSTed. */
+  const PRODUCTION_HOSTS = ["doorflow.com", "www.doorflow.com"];
+  const isProductionHost = PRODUCTION_HOSTS.some(h =>
+    typeof location !== "undefined" && location.hostname === h
+  );
+
   function persist(stage, payload = {}) {
     const body = {
       sessionId: state.sessionId,
@@ -1538,6 +1555,15 @@
       ...payload,
     };
     console.log("[connect.doorflow.com]", stage, body);
+
+    // Save locally regardless — this is what keeps the form recoverable
+    // across reloads.
+    saveSession();
+
+    // In dev, stop here. The endpoint isn't built yet and the 404s
+    // are not useful information.
+    if (!isProductionHost) return;
+
     try {
       fetch("https://connect.doorflow.com/api/lead-progress", {
         method: "POST",
@@ -1547,9 +1573,6 @@
         body: JSON.stringify(body),
       }).catch(() => {});
     } catch (e) {}
-    // Whatever we send to the server, save it locally too — keeps the
-    // browser-side cache in sync with the latest user-entered values.
-    saveSession();
   }
 
   /* ============================================
@@ -2570,7 +2593,20 @@
         first_name, last_name, company, user_phone,
       }),
     });
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json().catch(() => null);
+
+    // The API uses two error shapes depending on the failure type:
+    //   - 200 with { errors: [...] }       — validation failures
+    //   - non-200 with { error: "..." } or { errors: [...] }  — auth / server errors
+    // We try every plausible shape and surface the most informative
+    // string we can find. Falling back to "HTTP 403" etc. is still
+    // more useful than a generic "We couldn't place the call".
+    if (!res.ok) {
+      const detail =
+        (data && (data.error || (data.errors && data.errors.join(", ")))) ||
+        `HTTP ${res.status}`;
+      throw new Error(detail);
+    }
     if (data && data.errors && data.errors.length) {
       throw new Error(data.errors.join(", "));
     }
@@ -2711,10 +2747,18 @@
       pollLoop(id);
     } catch (err) {
       console.error("Call-back init failed:", err);
+      // The API's own error message is the most useful thing to show
+      // — "Domain not allowed", "Invalid phone format", etc. — but we
+      // wrap it in a friendly preamble so it doesn't read like a stack
+      // trace. Falls back to a generic message if there's no detail.
+      const apiMessage = (err && err.message) ? String(err.message) : "";
+      const desc = apiMessage
+        ? `Sorry — ${apiMessage}. Try again, or open the call form.`
+        : "Sorry — try again, or open the call form for a manual go.";
       setCallOptionState({
         state: "failed",
         title: "We couldn't place the call",
-        desc: "Sorry — try again, or open the call form for a manual go.",
+        desc,
         actions: ["retry", "widget"],
       });
     }
