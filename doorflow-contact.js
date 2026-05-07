@@ -60,11 +60,11 @@
   })();
 
   /* Build version stamp.
-     The string "2026-05-07T09:51:20Z" is replaced at build time with an
+     The string "2026-05-07T11:30:12Z" is replaced at build time with an
      ISO timestamp + short hash. If you ever see the literal token
      below in the console, it means the file was deployed without
      going through the build (run `node build.mjs`). */
-  const BUILD_VERSION = "2026-05-07T09:51:20Z";
+  const BUILD_VERSION = "2026-05-07T11:30:12Z";
 
   // Always log the version on boot — both as a structured field on the
   // session.boot event and as a separate banner line so it's easy to
@@ -292,6 +292,7 @@
     // starting it on entry.
     if (from === 3 && n !== 3 && typeof stopAvailabilityPolling === "function") {
       stopAvailabilityPolling();
+      if (typeof cancelCompletedAutoReset === "function") cancelCompletedAutoReset();
     }
   }
 
@@ -1390,7 +1391,7 @@
     // lines open or close, not whenever the next 30s server poll
     // happens to fire. So this tick re-renders the closed state so
     // messaging transitions smoothly between buckets ("Next open at
-    // 10:30" → "Opening soon" → "Lines should be open by now").
+    // 10:30" → "Opening soon").
     if (closedStateTickHandle) clearInterval(closedStateTickHandle);
     closedStateTickHandle = setInterval(() => {
       if (state.step !== 3) return;
@@ -1481,62 +1482,48 @@
     if (!forceReset && active.includes(el.dataset.state)) return;
 
     if (callbackAvailable === false) {
-      // Grade the closed-state message by how the announced open time
-      // compares to the wall clock. The server can lag — it sometimes
-      // keeps reporting closed past its own announced open time. We
-      // adapt the message so the user isn't staring at a stale "Next
-      // open at 10:30" five minutes after 10:30. If the server is
-      // significantly past its announced open time, we trust the
-      // wall clock more than the server and let the user try a call.
+      // Server says closed → we say closed. No second-guessing the
+      // server's data here; if the user thinks lines should be open
+      // and we let them try anyway, the call API just rejects with
+      // "Widget is not available" which is a worse experience than
+      // a clear "closed" message. The graded buckets below are just
+      // about *how* we say closed, not whether.
+      el.dataset.state = "closed";
+      el.setAttribute("aria-disabled", "true");
+      el.removeAttribute("tabindex");
+
       const nextOpenDate = callbackNextOpen ? parseAsUkTime(callbackNextOpen) : null;
       const minsUntilOpen = nextOpenDate ? (nextOpenDate.getTime() - Date.now()) / 60_000 : null;
 
-      if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen <= 0) {
-        // Announced open time has passed but the server is still
-        // saying closed — clearly the server is lagging reality.
-        // Trust the wall clock: enable the button and let the call
-        // API have the final word. If lines genuinely are still
-        // closed, the call API will reject and we'll show that.
-        // Better than a never-ending "closed" wall.
-        el.dataset.state = "ready";
-        el.removeAttribute("aria-disabled");
-        el.setAttribute("tabindex", "0");
-        title.textContent = "Lines should be open by now";
-        desc.innerHTML = state.phoneE164 && validateE164(state.phoneE164)
-          ? `We'll try ringing <strong>${state.phoneE164}</strong> anyway.`
-          : "We'll try ringing your number anyway.";
-      } else {
-        el.dataset.state = "closed";
-        el.setAttribute("aria-disabled", "true");
-        el.removeAttribute("tabindex");
+      let titleText = "Lines are closed right now";
+      let when = "You can still book a meeting above.";
 
-        let titleText = "Lines are closed right now";
-        let when = "You can still book a meeting above.";
-
-        if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen > 0) {
-          const time = nextOpenDate.toLocaleTimeString("en-GB", {
-            hour: "numeric", minute: "2-digit", timeZone: "Europe/London",
+      if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen > 0) {
+        const time = nextOpenDate.toLocaleTimeString("en-GB", {
+          hour: "numeric", minute: "2-digit", timeZone: "Europe/London",
+        });
+        if (minsUntilOpen <= 5) {
+          // Within 5 minutes — warmer tone, give them confidence.
+          titleText = "Opening soon";
+          when = `Lines open at ${time}.`;
+        } else {
+          // Genuine future open time — formal scheduled message.
+          const day = nextOpenDate.toLocaleDateString("en-GB", {
+            weekday: "long", timeZone: "Europe/London",
           });
-          if (minsUntilOpen <= 5) {
-            // Within 5 minutes — warmer tone, give them confidence.
-            titleText = "Opening soon";
-            when = `Lines open at ${time}.`;
-          } else {
-            // Genuine future open time — formal scheduled message.
-            const day = nextOpenDate.toLocaleDateString("en-GB", {
-              weekday: "long", timeZone: "Europe/London",
-            });
-            const today = new Date().toLocaleDateString("en-GB", {
-              weekday: "long", timeZone: "Europe/London",
-            });
-            when = day === today
-              ? `Next open at ${time}.`
-              : `Next open at ${time} on ${day}.`;
-          }
+          const today = new Date().toLocaleDateString("en-GB", {
+            weekday: "long", timeZone: "Europe/London",
+          });
+          when = day === today
+            ? `Next open at ${time}.`
+            : `Next open at ${time} on ${day}.`;
         }
-        title.textContent = titleText;
-        desc.textContent = when;
       }
+      // If nextOpen is in the past but the server still says closed,
+      // we just leave the default "Lines are closed right now" / "You
+      // can still book a meeting above." — honest, accurate, no lying.
+      title.textContent = titleText;
+      desc.textContent = when;
     } else {
       el.dataset.state = "ready";
       el.removeAttribute("aria-disabled");
@@ -1644,6 +1631,14 @@
      the call — there is no separate pill. */
   let activePollHandle = null;
   let activeCallRequestId = null;
+  // After a successful call completes, the panel sits in the "Call
+  // ended" state showing a tick. We give it 10 seconds to be visible
+  // (so the user registers the success), then auto-revert to the
+  // ready state so a follow-up call doesn't need an explicit click
+  // on "Place another call". Cancelled if anything else changes the
+  // pill state in the meantime.
+  let completedAutoResetHandle = null;
+  const COMPLETED_AUTO_RESET_MS = 10_000;
 
   function stopPolling() {
     if (activePollHandle) {
@@ -1759,6 +1754,22 @@
             desc: "Thanks for the chat — hope that was useful. We'll log everything for follow-up.",
             actions: ["another"],
           });
+          // Auto-revert to ready after a short while. The user gets
+          // a clear "yes, the call ended" beat, then the panel
+          // becomes interactive again on its own. Cancelled if any
+          // other state change (cancel, retry, leave step) intervenes.
+          if (completedAutoResetHandle) clearTimeout(completedAutoResetHandle);
+          completedAutoResetHandle = setTimeout(() => {
+            completedAutoResetHandle = null;
+            // Only auto-reset if we're still in the completed state —
+            // a manual click on "Place another call" or navigation
+            // away will have changed it, and we'd be stomping.
+            const el = document.getElementById("df-callNowBtn");
+            if (el && el.dataset.state === "completed") {
+              LOG.log("call", "completed_auto_reset", {});
+              refreshCallbackButton(true);
+            }
+          }, COMPLETED_AUTO_RESET_MS);
         } else if (outcome === "success") {
           const isVoicemail = /voicemail|answerphone|answer machine/i.test(status);
           setCallOptionState({
@@ -1906,6 +1917,35 @@
     } catch (err) {
       LOG.error("call", "init_failed", { error: String(err && err.message || err) });
       const apiMessage = (err && err.message) ? String(err.message) : "";
+
+      // Special case: the call API rejects with "Widget is not
+      // available" when lines are closed. This is functionally
+      // equivalent to availability_resolved with available:false,
+      // but it arrives via the call endpoint instead. We should
+      // treat it as a closed-state confirmation and not surface a
+      // scary "we couldn't place the call" red error — it's not a
+      // failure, it's just hours.
+      //
+      // TODO(connect-api): the c2c team should be informed that
+      // returning HTTP 403 + "Widget is not available" via /api/v1/call
+      // is awkward — it duplicates the availability check semantics
+      // and forces clients to special-case the error string. Cleaner
+      // would be to either (a) only ever reject via the availability
+      // endpoint and expect clients to gate on it, or (b) return a
+      // structured error code (e.g. {error_code: "outside_hours"}).
+      if (/widget is not available/i.test(apiMessage)) {
+        LOG.log("call", "init_rejected_as_closed", { reason: apiMessage });
+        // Update our cached availability so refreshCallbackButton
+        // renders the closed state with whatever next-open we have.
+        callbackAvailable = false;
+        refreshCallbackButton(true);   // forceReset to leave the active state
+        // Trigger a fresh availability check too — the server may
+        // have just newly closed and our cached nextOpen could be
+        // out of date.
+        checkCallbackAvailability();
+        return;
+      }
+
       const desc = apiMessage
         ? `Sorry — ${apiMessage}. Try again, or open the call form.`
         : "Sorry — try again, or open the call form for a manual go.";
@@ -1969,10 +2009,18 @@
     activeCallRequestId = null;
   });
 
+  function cancelCompletedAutoReset() {
+    if (completedAutoResetHandle) {
+      clearTimeout(completedAutoResetHandle);
+      completedAutoResetHandle = null;
+    }
+  }
+
   document.getElementById("df-closeCallBtn").addEventListener("click", (e) => {
     e.stopPropagation();
     LOG.log("call", "panel_closed", { hadActiveRequest: !!activeCallRequestId });
     stopPolling();
+    cancelCompletedAutoReset();
     activeCallRequestId = null;
     refreshCallbackButton(true);   // force reset to ready/closed
   });
@@ -1980,6 +2028,7 @@
   document.getElementById("df-retryCallBtn").addEventListener("click", (e) => {
     e.stopPropagation();
     LOG.log("call", "retry_requested", {});
+    cancelCompletedAutoReset();
     refreshCallbackButton(true);   // force reset before re-firing
     // Slight delay before triggering — feels less violent than a no-flicker re-fire.
     setTimeout(handleCallNowActivate, 80);
@@ -1989,6 +2038,7 @@
     e.stopPropagation();
     LOG.log("call", "another_call_requested", {});
     stopPolling();
+    cancelCompletedAutoReset();
     activeCallRequestId = null;
     refreshCallbackButton(true);   // back to ready, ready for another go
   });
