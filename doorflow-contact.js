@@ -60,11 +60,11 @@
   })();
 
   /* Build version stamp.
-     The string "2026-05-07T11:30:12Z" is replaced at build time with an
+     The string "2026-05-07T13:11:53Z" is replaced at build time with an
      ISO timestamp + short hash. If you ever see the literal token
      below in the console, it means the file was deployed without
      going through the build (run `node build.mjs`). */
-  const BUILD_VERSION = "2026-05-07T11:30:12Z";
+  const BUILD_VERSION = "2026-05-07T13:11:53Z";
 
   // Always log the version on boot — both as a structured field on the
   // session.boot event and as a separate banner line so it's easy to
@@ -1640,6 +1640,30 @@
   let completedAutoResetHandle = null;
   const COMPLETED_AUTO_RESET_MS = 10_000;
 
+  // Lifecycle timings for the active call. Used purely for logging
+  // right now — they let us see at terminal time how long each phase
+  // lasted (request → first-connected → completed), which helps
+  // diagnose calls that ended unusually fast (e.g. agent hung up
+  // without a real conversation).
+  //
+  // TODO(brief-call-detection): once we know what fields the c2c
+  // `call_request` payload exposes, replace this purely-client-side
+  // timing with whatever the server tells us authoritatively. Until
+  // then, connected-phase duration is a useful heuristic — anything
+  // under ~10 seconds of "Call connected" before "Call completed"
+  // is likely a dropped/aborted call rather than a real conversation,
+  // and we could surface that with gentler copy ("Call ended early
+  // — try again?") instead of the celebratory "Thanks for the chat".
+  let callTimings = null;
+  function resetCallTimings() {
+    callTimings = {
+      requestedAt: null,         // ms — when we POSTed /call
+      firstConnectedAt: null,    // ms — first poll showing "Call connected"
+      terminalAt: null,          // ms — first terminal poll
+    };
+  }
+  resetCallTimings();
+
   function stopPolling() {
     if (activePollHandle) {
       clearTimeout(activePollHandle);
@@ -1719,12 +1743,35 @@
     }
     try {
       const data = await fetchCallStatus(callRequestId);
+      // Track first-time-we-saw-connected so we can later compute how
+      // long the connected phase lasted. Useful for spotting calls
+      // that ended unusually fast (likely dropped). See the
+      // TODO(brief-call-detection) note where callTimings is declared.
+      if (data.status === "Call connected" && callTimings && !callTimings.firstConnectedAt) {
+        callTimings.firstConnectedAt = Date.now();
+        LOG.log("call", "phase_connected_started", {
+          callRequestId,
+          msSinceRequest: callTimings.requestedAt
+            ? Date.now() - callTimings.requestedAt
+            : null,
+        });
+      }
+      // Break out call_request as a top-level field so its keys are
+      // visible without expanding the `full` object — it's the most
+      // interesting nested payload for diagnosing call outcomes.
+      // TODO(brief-call-detection): the fields we're hoping to see
+      // here include duration / end_reason / hung_up_by / agent_id /
+      // started_at / ended_at — anything the server can tell us
+      // about WHY a call ended. Once we know the shape, we can
+      // build the brief-call detection on real signal rather than
+      // a poll-count heuristic.
       LOG.log("call", `poll_${attempt + 1}`, {
         callRequestId,
         attempt: attempt + 1,
         status: data.status,
         cancellable: data.cancellable,
         continue_polling: data.continue_polling,
+        call_request: data.call_request || null,
         full: data,
       });
 
@@ -1738,16 +1785,43 @@
       // string is. Otherwise render the in-flight state.
       if (!continuing) {
         const outcome = classifyTerminalStatus(status);
+        // Compute lifecycle durations for this call.
+        if (callTimings) callTimings.terminalAt = Date.now();
+        const totalMs = callTimings && callTimings.requestedAt
+          ? callTimings.terminalAt - callTimings.requestedAt
+          : null;
+        const connectedMs = callTimings && callTimings.firstConnectedAt
+          ? callTimings.terminalAt - callTimings.firstConnectedAt
+          : null;
         LOG.log("call", "poll_terminal", {
           callRequestId,
           finalStatus: status,
           classified: outcome,
           totalPolls: attempt + 1,
+          totalMs,
+          connectedMs,                  // null if we never reached "Call connected"
+          // Echo the call_request payload at terminal time too — it's
+          // most likely to contain final details (duration, end reason)
+          // here vs on intermediate polls.
+          call_request: data.call_request || null,
+          full: data,
         });
         if (outcome === "completed") {
           // Successful call ended normally. Tick icon, friendly close,
           // option to start a new call. No "Try again" — there's
           // nothing to retry; the call worked.
+          //
+          // TODO(brief-call-detection): once we have a reliable signal
+          // for whether a call was a real conversation vs a dropped
+          // /aborted attempt, branch the copy here. Likely options:
+          //   - very short (e.g. <10s connectedMs): "Call ended early.
+          //     If that was a mistake, you can place another call now."
+          //     with actions: ["another", "retry"] — retry kicks off
+          //     a new attempt without an explicit click.
+          //   - normal duration: current celebratory copy.
+          // We'd ideally key off a server field (call_request.end_reason
+          // or duration_seconds), falling back to our locally-computed
+          // connectedMs if the server doesn't provide one.
           setCallOptionState({
             state: "completed",
             title: "Call ended",
@@ -1901,6 +1975,10 @@
       email: state.email,
       extension: state.ext,
     });
+
+    // Reset and start tracking lifecycle timings for this call.
+    resetCallTimings();
+    callTimings.requestedAt = Date.now();
 
     setCallOptionState({
       state: "dialling",
