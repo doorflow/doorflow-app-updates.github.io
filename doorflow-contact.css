@@ -1106,9 +1106,18 @@
      embed script loaded so window.callWidgetInstance is available as
      a fallback (the "Open the call form" button uses it), but we
      don't want the duplicate floating affordance — our inline call
-     option already covers it. */
-   .df-contact .call-widget-button { display: none !important; }
-   .df-contact .call-widget-modal { display: none; }
+     option already covers it.
+
+     IMPORTANT: these rules MUST stay at global scope (not nested
+     under .df-contact) because the c2c widget injects its bubble as
+     a direct child of body, outside our wrapper. The build script
+     looks for a no-scope sentinel comment immediately above each
+     rule and leaves that rule alone. */
+  /* @no-scope */
+  .call-widget-button { display: none !important; }
+  /* @no-scope */
+  .call-widget-modal { display: none; }
   /* The widget's modal we DO want to show when the user clicks the
      fallback link, so re-enable it when its .active class is set. */
-   .df-contact .call-widget-modal.active { display: flex !important; }
+  /* @no-scope */
+  .call-widget-modal.active { display: flex !important; }

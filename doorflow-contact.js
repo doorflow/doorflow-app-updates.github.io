@@ -271,6 +271,12 @@
     refreshHeaderContext();
     saveSession();
     LOG.log("step", "transitioned", { from, to: n });
+    // Step-leave hook: if we left step 3, the availability poll
+    // shouldn't keep running. Each step that needs polling owns
+    // starting it on entry.
+    if (from === 3 && n !== 3 && typeof stopAvailabilityPolling === "function") {
+      stopAvailabilityPolling();
+    }
   }
 
   document.querySelectorAll("[data-back]").forEach(b => {
@@ -914,6 +920,7 @@
     renderCalendar();
     refreshTalkOptions();          // tailor the dial number to their country
     checkCallbackAvailability();   // check if call-me-now is live right now
+    startAvailabilityPolling();    // …and keep it fresh while they're on this step
   });
 
   /* ============================================
@@ -1220,6 +1227,14 @@
      where `time` is when lines next open if currently closed. */
   let callbackAvailable = null;   // null = unknown, true = open, false = closed
   let callbackNextOpen = null;
+  let availabilityPollHandle = null;
+
+  /* How often we re-check availability while step 3 is visible. The
+     widget config could change at any time on the connect.doorflow.com
+     side (someone toggles it off, lines genuinely close, etc.) and
+     we want the UI to follow within a reasonable window. Set tight
+     during testing — relax to 60_000+ once it's known to be working. */
+  const AVAILABILITY_POLL_MS = 30_000;
 
   async function checkCallbackAvailability() {
     LOG.log("call", "availability_check", { widgetId: C2C_WIDGET });
@@ -1230,10 +1245,18 @@
       const status = data.status || {};
       callbackAvailable = !!(status.active && status.available);
       callbackNextOpen = status.time || null;
+      // Log the FULL status payload alongside the local time
+      // interpretation so we can diagnose timezone issues. If the
+      // server returns a UTC time but is configured assuming GMT (no
+      // BST adjustment), this is where it'll be visible.
       LOG.log("call", "availability_resolved", {
         active: !!status.active,
         available: !!status.available,
         nextOpen: callbackNextOpen,
+        nextOpenLocal: callbackNextOpen ? new Date(callbackNextOpen).toLocaleString("en-GB", { timeZone: "Europe/London" }) : null,
+        nowLocal: new Date().toLocaleString("en-GB", { timeZone: "Europe/London" }),
+        nowUtc: new Date().toISOString(),
+        rawStatus: status,
       });
     } catch (e) {
       // If we can't reach the API, assume callable rather than blocking.
@@ -1242,6 +1265,47 @@
       callbackAvailable = true;
     }
     refreshCallbackButton();
+  }
+
+  /* Periodic re-check loop. Runs while:
+       - we're on step 3
+       - the page is visible (no point polling if the user has
+         backgrounded the tab)
+       - no call is currently in flight (would be redundant during
+         a call and we don't want to flicker the button state)
+     Started by startAvailabilityPolling(), stopped by stop. The
+     interval is configurable via AVAILABILITY_POLL_MS above. */
+  function startAvailabilityPolling() {
+    stopAvailabilityPolling();
+    if (typeof document !== "undefined" && document.hidden) return;
+    availabilityPollHandle = setInterval(() => {
+      // Skip if we've left step 3, the tab's hidden, or we're mid-call.
+      if (state.step !== 3) { stopAvailabilityPolling(); return; }
+      if (document.hidden) return;     // pause but don't stop
+      if (activeCallRequestId) return; // pause during in-flight call
+      checkCallbackAvailability();
+    }, AVAILABILITY_POLL_MS);
+    LOG.log("call", "availability_polling_started", { intervalMs: AVAILABILITY_POLL_MS });
+  }
+  function stopAvailabilityPolling() {
+    if (availabilityPollHandle) {
+      clearInterval(availabilityPollHandle);
+      availabilityPollHandle = null;
+      LOG.log("call", "availability_polling_stopped", {});
+    }
+  }
+
+  /* When the tab becomes visible again after being hidden, re-check
+     availability immediately (don't wait up to AVAILABILITY_POLL_MS).
+     This catches the "I came back from another tab and the lines just
+     opened" case nicely. */
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && state.step === 3 && !activeCallRequestId) {
+        LOG.log("call", "visibility_resumed", {});
+        checkCallbackAvailability();
+      }
+    });
   }
 
   /* Refresh the "Call me now" element. Two non-active states ride
@@ -2091,6 +2155,7 @@ We'll call {phone} at the scheduled time. If anything changes, just reply to the
       renderCalendar();
       refreshTalkOptions();
       checkCallbackAvailability();
+      startAvailabilityPolling();
     } else if (state.step === 2) {
       setStep(2);
     } else {
