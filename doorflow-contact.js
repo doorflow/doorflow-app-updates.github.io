@@ -60,11 +60,11 @@
   })();
 
   /* Build version stamp.
-     The string "2026-05-07T13:11:53Z" is replaced at build time with an
+     The string "2026-05-07T13:31:03Z" is replaced at build time with an
      ISO timestamp + short hash. If you ever see the literal token
      below in the console, it means the file was deployed without
      going through the build (run `node build.mjs`). */
-  const BUILD_VERSION = "2026-05-07T13:11:53Z";
+  const BUILD_VERSION = "2026-05-07T13:31:03Z";
 
   // Always log the version on boot — both as a structured field on the
   // session.boot event and as a separate banner line so it's easy to
@@ -1756,19 +1756,43 @@
             : null,
         });
       }
-      // Break out call_request as a top-level field so its keys are
-      // visible without expanding the `full` object — it's the most
-      // interesting nested payload for diagnosing call outcomes.
-      // TODO(brief-call-detection): the fields we're hoping to see
-      // here include duration / end_reason / hung_up_by / agent_id /
-      // started_at / ended_at — anything the server can tell us
-      // about WHY a call ended. Once we know the shape, we can
-      // build the brief-call detection on real signal rather than
-      // a poll-count heuristic.
+      // Surface the per-leg Twilio statuses as top-level fields so
+      // they're skimmable in the console without expanding nested
+      // objects. The c2c controller squashes both into the human
+      // status string but the underlying truth is in the two leg
+      // statuses — that's where we can see e.g. "agent leg is
+      // in-progress but user leg is requested" (i.e. agent answered
+      // but we haven't dialled the user yet).
+      //
+      // From inspecting the c2c controller's call_request_status
+      // logic, the leg statuses follow Twilio's call lifecycle:
+      //   sales_status: requested → initiated → ringing → in-progress
+      //                          → completed | no-answer | busy | failed | canceled
+      //   user_status:  same vocabulary, plus "answered" in some paths
+      //
+      // The squashed status string is:
+      //   "Notifying agent ..."  while sales_status is in-progress/initiated/ringing
+      //   "Calling you now ..."  when sales_status confirmed OR user_status ringing
+      //   "Call connected"       when user_status answered, OR both legs in-progress
+      //   "Call completed"       when user_status completed
+      //   voicemail message      when sales_status is unavailable/no-answer/busy
+      //
+      // TODO(twilio-leg-truth): the "both legs in-progress" path to
+      // "Call connected" is unreliable — Twilio reports in-progress
+      // for the dial action, not necessarily user pickup. We've seen
+      // sessions where the agent's line auto-answered (voicemail
+      // forking?) and the user-side dial appeared to progress without
+      // the user's phone actually ringing. The c2c team could improve
+      // this by only declaring "Call connected" when the user-side
+      // <Dial> action's child call confirms answered audio, not just
+      // in-progress state.
+      const cr = data.call_request || {};
       LOG.log("call", `poll_${attempt + 1}`, {
         callRequestId,
         attempt: attempt + 1,
         status: data.status,
+        sales_status: cr.sales_status || null,
+        user_status: cr.user_status || null,
         cancellable: data.cancellable,
         continue_polling: data.continue_polling,
         call_request: data.call_request || null,
@@ -1793,10 +1817,17 @@
         const connectedMs = callTimings && callTimings.firstConnectedAt
           ? callTimings.terminalAt - callTimings.firstConnectedAt
           : null;
+        const cr2 = data.call_request || {};
         LOG.log("call", "poll_terminal", {
           callRequestId,
           finalStatus: status,
           classified: outcome,
+          // Final per-leg statuses — most diagnostic for call outcomes.
+          // E.g. sales_status:"no-answer" → agent never picked up;
+          // sales_status:"completed", user_status:"completed" with
+          // a long connectedMs → real conversation.
+          sales_status: cr2.sales_status || null,
+          user_status: cr2.user_status || null,
           totalPolls: attempt + 1,
           totalMs,
           connectedMs,                  // null if we never reached "Call connected"
@@ -1848,10 +1879,10 @@
           const isVoicemail = /voicemail|answerphone|answer machine/i.test(status);
           setCallOptionState({
             state: "connected",
-            title: isVoicemail ? "Off to voicemail" : "You're through",
+            title: isVoicemail ? "Off to voicemail" : "Talking now",
             desc: isVoicemail
               ? "Looks like our team can't pick up right now — we sent the call to voicemail so you can leave a message. We'll get back to you."
-              : "Have a great call. We'll log everything for follow-up.",
+              : "We'll log everything for follow-up.",
             actions: ["close"],
           });
         } else if (outcome === "declined" || outcome === "no_answer" || outcome === "busy") {
@@ -1890,7 +1921,7 @@
       //   3. Bridging to user — once the team-side connects, we ring
       //      the user's phone. This is when "answer when your phone
       //      rings" is honest.
-      //   4. Connected — both sides bridged. "You're through".
+      //   4. Connected — both sides bridged. "Talking now".
       //
       // The c2c API doesn't give us a clean enum, so we substring-
       // match the human-readable status strings. Anything we don't
@@ -1905,8 +1936,13 @@
 
       let inflightTitle, inflightDesc;
       if (fullyConnected) {
-        inflightTitle = "You're through";
-        inflightDesc  = "Have a great call. We'll log everything for follow-up.";
+        // The phrase we used to use here was ambiguous — at least one
+        // user read it as "you're done with the call" rather than
+        // "you're now connected", and was confused when polling
+        // continued. Keep the wording present-active so it can't be
+        // misread as past-tense / completion.
+        inflightTitle = "Talking now";
+        inflightDesc  = "We'll log everything for follow-up.";
       } else if (isPreparing) {
         inflightTitle = "Preparing your call…";
         inflightDesc  = "Just a moment — getting things set up.";
