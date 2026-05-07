@@ -60,11 +60,11 @@
   })();
 
   /* Build version stamp.
-     The string "2026-05-07T09:39:17Z" is replaced at build time with an
+     The string "2026-05-07T09:51:20Z" is replaced at build time with an
      ISO timestamp + short hash. If you ever see the literal token
      below in the console, it means the file was deployed without
      going through the build (run `node build.mjs`). */
-  const BUILD_VERSION = "2026-05-07T09:39:17Z";
+  const BUILD_VERSION = "2026-05-07T09:51:20Z";
 
   // Always log the version on boot — both as a structured field on the
   // session.boot event and as a separate banner line so it's easy to
@@ -1320,6 +1320,7 @@
   let callbackNextOpen = null;
   let availabilityPollHandle = null;
   let closedStateTickHandle = null;
+  let boundaryPollHandle = null;
 
   /* How often we re-check availability while step 3 is visible. The
      widget config could change at any time on the connect.doorflow.com
@@ -1360,6 +1361,10 @@
       callbackAvailable = true;
     }
     refreshCallbackButton();
+    // Reschedule the precise boundary poll in case nextOpen has
+    // changed in this response. Safe to call when polling isn't
+    // active — it's a no-op then.
+    if (typeof scheduleBoundaryPoll === "function") scheduleBoundaryPoll();
   }
 
   /* Periodic re-check loop. Runs while:
@@ -1381,24 +1386,52 @@
       checkCallbackAvailability();
     }, AVAILABILITY_POLL_MS);
     LOG.log("call", "availability_polling_started", { intervalMs: AVAILABILITY_POLL_MS });
-    // Separate clock tick: even between server polls, re-render the
-    // closed-state message so we transition smoothly between buckets
-    // ("Next open at 10:30" → "Opening soon" → "Opening any moment
-    // now" → "Lines should be open by now"). Cheap to run every 15s.
+    // Separate clock tick. The user expects the UI to flip the moment
+    // lines open or close, not whenever the next 30s server poll
+    // happens to fire. So this tick re-renders the closed state so
+    // messaging transitions smoothly between buckets ("Next open at
+    // 10:30" → "Opening soon" → "Lines should be open by now").
     if (closedStateTickHandle) clearInterval(closedStateTickHandle);
     closedStateTickHandle = setInterval(() => {
       if (state.step !== 3) return;
       if (activeCallRequestId) return;
-      // Only refresh if we're in the closed state — no point doing work
-      // for the ready/active states which don't depend on wall clock.
+
       const el = document.getElementById("df-callNowBtn");
+      // Re-render closed state for graded message buckets.
       if (el && el.dataset.state === "closed") refreshCallbackButton();
-      else if (el && el.dataset.state === "ready" && callbackAvailable === false) {
-        // We've already optimistically flipped to ready (server stale
-        // case). Don't refresh — leave the user's potential click
-        // intact. Next server poll will re-evaluate.
+      // Also re-render ready when we're showing closing-soon — the
+      // countdown text needs to track the clock.
+      if (el && el.dataset.state === "ready" && callbackAvailable === true) {
+        refreshCallbackButton();
       }
     }, 15_000);
+
+    // Schedule a precise one-shot poll at the next announced boundary.
+    // This is what makes the UI tick to available/closed *the second*
+    // the announced moment elapses — independent of the 30s scheduled
+    // poll. We add a small grace (1s) so the server has a beat to
+    // catch up; the grade-by-time logic in refreshCallbackButton
+    // covers the case where the server's still lagging.
+    scheduleBoundaryPoll();
+  }
+  function scheduleBoundaryPoll() {
+    if (boundaryPollHandle) {
+      clearTimeout(boundaryPollHandle);
+      boundaryPollHandle = null;
+    }
+    if (!callbackNextOpen) return;
+    const t = parseAsUkTime(callbackNextOpen);
+    if (!t) return;
+    const msUntil = t.getTime() - Date.now() + 1000; // +1s grace
+    if (msUntil <= 0) return; // boundary's in the past; the next poll will catch up
+    LOG.log("call", "boundary_poll_scheduled", { atIso: t.toISOString(), inMs: msUntil });
+    boundaryPollHandle = setTimeout(() => {
+      boundaryPollHandle = null;
+      if (state.step !== 3) return;
+      if (activeCallRequestId) return;
+      LOG.log("call", "boundary_reached_immediate_poll", {});
+      checkCallbackAvailability();
+    }, msUntil);
   }
   function stopAvailabilityPolling() {
     if (availabilityPollHandle) {
@@ -1409,6 +1442,10 @@
     if (closedStateTickHandle) {
       clearInterval(closedStateTickHandle);
       closedStateTickHandle = null;
+    }
+    if (boundaryPollHandle) {
+      clearTimeout(boundaryPollHandle);
+      boundaryPollHandle = null;
     }
   }
 
@@ -1454,17 +1491,20 @@
       const nextOpenDate = callbackNextOpen ? parseAsUkTime(callbackNextOpen) : null;
       const minsUntilOpen = nextOpenDate ? (nextOpenDate.getTime() - Date.now()) / 60_000 : null;
 
-      if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen <= -2) {
-        // Announced open time is more than 2 minutes in the past —
-        // the server's metadata is stale. Surface this honestly and
-        // let the user try a call. If the lines genuinely are still
-        // closed, the call API will say so and we'll show the error
-        // properly. Better than a never-ending "closed" wall.
+      if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen <= 0) {
+        // Announced open time has passed but the server is still
+        // saying closed — clearly the server is lagging reality.
+        // Trust the wall clock: enable the button and let the call
+        // API have the final word. If lines genuinely are still
+        // closed, the call API will reject and we'll show that.
+        // Better than a never-ending "closed" wall.
         el.dataset.state = "ready";
         el.removeAttribute("aria-disabled");
         el.setAttribute("tabindex", "0");
         title.textContent = "Lines should be open by now";
-        desc.textContent = "We'll try to put your call through anyway.";
+        desc.innerHTML = state.phoneE164 && validateE164(state.phoneE164)
+          ? `We'll try ringing <strong>${state.phoneE164}</strong> anyway.`
+          : "We'll try ringing your number anyway.";
       } else {
         el.dataset.state = "closed";
         el.setAttribute("aria-disabled", "true");
@@ -1473,16 +1513,11 @@
         let titleText = "Lines are closed right now";
         let when = "You can still book a meeting above.";
 
-        if (nextOpenDate && minsUntilOpen !== null) {
+        if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen > 0) {
           const time = nextOpenDate.toLocaleTimeString("en-GB", {
             hour: "numeric", minute: "2-digit", timeZone: "Europe/London",
           });
-          if (minsUntilOpen <= 0) {
-            // 0–2 minutes in the past — server's about to flip, just
-            // a small hold message.
-            titleText = "Opening any moment now";
-            when = "We're checking — we'll let you know.";
-          } else if (minsUntilOpen <= 5) {
+          if (minsUntilOpen <= 5) {
             // Within 5 minutes — warmer tone, give them confidence.
             titleText = "Opening soon";
             when = `Lines open at ${time}.`;
@@ -1491,7 +1526,6 @@
             const day = nextOpenDate.toLocaleDateString("en-GB", {
               weekday: "long", timeZone: "Europe/London",
             });
-            // Same-day vs other-day — drop the day name if it's today.
             const today = new Date().toLocaleDateString("en-GB", {
               weekday: "long", timeZone: "Europe/London",
             });
@@ -1507,10 +1541,36 @@
       el.dataset.state = "ready";
       el.removeAttribute("aria-disabled");
       el.setAttribute("tabindex", "0");
-      title.textContent = "Call me now";
-      desc.textContent = state.phoneE164 && validateE164(state.phoneE164)
-        ? `We'll ring ${state.phoneE164} in about 30 seconds`
-        : "We'll ring your number in about 30 seconds";
+
+      // While available, the server's `time` field (if present) is
+      // the next-close time. Use it to surface a "closing soon" hint
+      // when we're within 5 minutes of cut-off. This stops a user
+      // placing a call right before lines close. If the field isn't
+      // present we just skip the hint.
+      // TODO: handle the extension number too. Once we ring the user
+      // and they pick up, we should make it easy for them to know
+      // their entered extension is being used. For now we just dial
+      // the main number and the c2c side reads the extension from
+      // the call payload. The display copy below could include
+      // "ext. 123" if state.ext is set.
+      const nextCloseDate = callbackNextOpen ? parseAsUkTime(callbackNextOpen) : null;
+      const minsUntilClose = nextCloseDate ? (nextCloseDate.getTime() - Date.now()) / 60_000 : null;
+      const closingSoon = minsUntilClose !== null && minsUntilClose > 0 && minsUntilClose <= 5;
+
+      if (closingSoon) {
+        const closeTime = nextCloseDate.toLocaleTimeString("en-GB", {
+          hour: "numeric", minute: "2-digit", timeZone: "Europe/London",
+        });
+        title.textContent = "Closing soon";
+        desc.innerHTML = state.phoneE164 && validateE164(state.phoneE164)
+          ? `We'll ring <strong>${state.phoneE164}</strong> now — lines close at ${closeTime}.`
+          : `We'll ring your number now — lines close at ${closeTime}.`;
+      } else {
+        title.textContent = "Call me now";
+        desc.innerHTML = state.phoneE164 && validateE164(state.phoneE164)
+          ? `We'll ring <strong>${state.phoneE164}</strong> in about 30 seconds.`
+          : "We'll ring your number in about 30 seconds.";
+      }
     }
   }
 
