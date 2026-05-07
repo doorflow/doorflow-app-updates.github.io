@@ -1212,6 +1212,75 @@
     return (state.phoneE164 || "").startsWith("+1") ? "US" : "GB";
   }
 
+  /* ---------------------------------------------
+     Server-time workaround
+     ---------------------------------------------
+     The connect.doorflow.com widget endpoint returns availability
+     timestamps with a "Z" suffix (suggesting UTC) but the values are
+     actually configured as UK wall-clock times — i.e. when the
+     server says "2026-05-07T18:00:00Z", it really means 18:00
+     Europe/London local, not 18:00 UTC. This is a server bug that
+     should be fixed there eventually, but until then we compensate
+     client-side.
+
+     parseAsUkTime(): take the wall-clock components from an ISO
+     string and reinterpret them as Europe/London local. Returns a
+     Date pointing to the correct UTC instant for that UK wall time.
+
+     fmtServerTime(): format a server-provided "Z" timestamp for
+     human display, treating the components as UK-local (so 18:00Z
+     displays as 18:00 / 6pm).
+
+     If/when connect.doorflow.com starts returning real UTC
+     timestamps, delete both helpers and switch back to plain
+     `new Date(serverTime)`. */
+  function parseAsUkTime(serverIso) {
+    if (!serverIso) return null;
+    // Strip any zone designator — we treat the wall-clock components
+    // as UK-local regardless of what the server claims. A Z, a +HH:MM,
+    // or no suffix all get the same treatment.
+    const wallClock = String(serverIso).replace(/(Z|[+-]\d{2}:?\d{2})$/, "");
+    // Naive parse — treats the string as UTC due to JS's ISO behaviour
+    // when no zone is present. We then offset by however much UK is
+    // ahead of UTC at that wall-clock moment (1h during BST, 0h in
+    // GMT). Computing this from the date itself is mildly tricky
+    // because the offset depends on the date — we use Intl to ask.
+    const naive = new Date(wallClock + "Z");
+    if (isNaN(naive)) return null;
+    // Find UK's offset for that calendar moment.
+    const ukOffsetMin = ukOffsetMinutesAt(naive);
+    return new Date(naive.getTime() - ukOffsetMin * 60_000);
+  }
+  function ukOffsetMinutesAt(date) {
+    // Returns positive minutes for offsets ahead of UTC (so BST = 60).
+    // Uses Intl.DateTimeFormat to format the date in Europe/London and
+    // diffs it from the same moment formatted as UTC. The shortOffset
+    // formatter gives strings like "GMT+1" / "GMT" we can parse, but
+    // diff-via-format is more robust against locale quirks.
+    const dtf = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false,
+    });
+    const parts = dtf.formatToParts(date).reduce((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+    // Reconstruct a UTC date from those wall-clock parts and diff.
+    const ukAsUtc = Date.UTC(
+      parseInt(parts.year), parseInt(parts.month) - 1, parseInt(parts.day),
+      parseInt(parts.hour) === 24 ? 0 : parseInt(parts.hour),
+      parseInt(parts.minute), parseInt(parts.second)
+    );
+    return Math.round((ukAsUtc - date.getTime()) / 60_000);
+  }
+  function fmtServerTime(serverIso, opts) {
+    const d = parseAsUkTime(serverIso);
+    if (!d) return "";
+    return d.toLocaleString("en-GB", { timeZone: "Europe/London", ...(opts || {}) });
+  }
+
   function refreshTalkOptions() {
     const region = pickSupportRegion();
     const support = SUPPORT_NUMBERS[region];
@@ -1253,7 +1322,10 @@
         active: !!status.active,
         available: !!status.available,
         nextOpen: callbackNextOpen,
-        nextOpenLocal: callbackNextOpen ? new Date(callbackNextOpen).toLocaleString("en-GB", { timeZone: "Europe/London" }) : null,
+        // Interpret server's "Z" suffix as UK-local (server bug
+        // workaround — see parseAsUkTime). Once the server is fixed,
+        // switch back to `new Date(callbackNextOpen).toLocaleString(...)`.
+        nextOpenLocal: callbackNextOpen ? fmtServerTime(callbackNextOpen) : null,
         nowLocal: new Date().toLocaleString("en-GB", { timeZone: "Europe/London" }),
         nowUtc: new Date().toISOString(),
         rawStatus: status,
@@ -1310,16 +1382,21 @@
 
   /* Refresh the "Call me now" element. Two non-active states ride
      here (ready / closed). Active states are set by the call handlers
-     directly via setCallOptionState(). */
-  function refreshCallbackButton() {
+     directly via setCallOptionState().
+
+     forceReset: when true, bypass the "don't stomp on an active call"
+     guard. Used by the close/retry/another handlers — they're
+     deliberately leaving an active state and want a clean slate. */
+  function refreshCallbackButton(forceReset) {
     const el = document.getElementById("df-callNowBtn");
     const title = document.getElementById("df-callNowTitle");
     const desc = document.getElementById("df-callNowDesc");
     if (!el) return;
 
-    // Don't stomp on an active call — leave it alone.
-    const active = ["dialling", "ringing", "connected", "cancelled", "failed"];
-    if (active.includes(el.dataset.state)) return;
+    // Don't stomp on an active call — leave it alone (unless the
+    // caller explicitly asked for a reset).
+    const active = ["dialling", "ringing", "connected", "cancelled", "failed", "completed"];
+    if (!forceReset && active.includes(el.dataset.state)) return;
 
     if (callbackAvailable === false) {
       el.dataset.state = "closed";
@@ -1329,10 +1406,14 @@
       let when = "You can still book a meeting above.";
       if (callbackNextOpen) {
         try {
-          const t = new Date(callbackNextOpen);
-          const day = t.toLocaleDateString("en-GB", { weekday: "long" });
-          const time = t.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit" });
-          when = `Next open at ${time} on ${day}.`;
+          // Server returns wall-clock UK times labelled as "Z" — see
+          // parseAsUkTime for the workaround.
+          const t = parseAsUkTime(callbackNextOpen);
+          if (t) {
+            const day = t.toLocaleDateString("en-GB", { weekday: "long", timeZone: "Europe/London" });
+            const time = t.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", timeZone: "Europe/London" });
+            when = `Next open at ${time} on ${day}.`;
+          }
         } catch (e) {}
       }
       desc.textContent = when;
@@ -1437,6 +1518,7 @@
     document.getElementById("df-cancelCallBtn").hidden = !set.has("cancel");
     document.getElementById("df-closeCallBtn").hidden  = !set.has("close");
     document.getElementById("df-retryCallBtn").hidden  = !set.has("retry");
+    document.getElementById("df-anotherCallBtn").hidden = !set.has("another");
     document.getElementById("df-openWidgetBtn").hidden = !set.has("widget");
   }
 
@@ -1462,6 +1544,11 @@
        "unknown"   — we don't recognise the string */
   function classifyTerminalStatus(statusStr) {
     const s = (statusStr || "").toLowerCase();
+    // "Call completed" is what we get after a successful call ends —
+    // distinct from "Call connected" which fires while still in
+    // progress. Treat it as a separate terminal so the UI can
+    // celebrate rather than cross-icon it.
+    if (s.includes("completed") || s.includes("call ended")) return "completed";
     if (s.includes("connected"))    return "success";
     // Voicemail variants — both explicit ("voicemail", "answerphone")
     // and the indirect language the API sometimes uses ("leave us a
@@ -1516,7 +1603,17 @@
           classified: outcome,
           totalPolls: attempt + 1,
         });
-        if (outcome === "success") {
+        if (outcome === "completed") {
+          // Successful call ended normally. Tick icon, friendly close,
+          // option to start a new call. No "Try again" — there's
+          // nothing to retry; the call worked.
+          setCallOptionState({
+            state: "completed",
+            title: "Call ended",
+            desc: "Thanks for the chat — hope that was useful. We'll log everything for follow-up.",
+            actions: ["another"],
+          });
+        } else if (outcome === "success") {
           const isVoicemail = /voicemail|answerphone|answer machine/i.test(status);
           setCallOptionState({
             state: "connected",
@@ -1731,15 +1828,23 @@
     LOG.log("call", "panel_closed", { hadActiveRequest: !!activeCallRequestId });
     stopPolling();
     activeCallRequestId = null;
-    refreshCallbackButton();   // back to ready/closed
+    refreshCallbackButton(true);   // force reset to ready/closed
   });
 
   document.getElementById("df-retryCallBtn").addEventListener("click", (e) => {
     e.stopPropagation();
     LOG.log("call", "retry_requested", {});
-    refreshCallbackButton();
+    refreshCallbackButton(true);   // force reset before re-firing
     // Slight delay before triggering — feels less violent than a no-flicker re-fire.
     setTimeout(handleCallNowActivate, 80);
+  });
+
+  document.getElementById("df-anotherCallBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    LOG.log("call", "another_call_requested", {});
+    stopPolling();
+    activeCallRequestId = null;
+    refreshCallbackButton(true);   // back to ready, ready for another go
   });
 
   document.getElementById("df-openWidgetBtn").addEventListener("click", (e) => {
@@ -2199,6 +2304,7 @@ We'll call {phone} at the scheduled time. If anything changes, just reply to the
       validateEmail, validateExt, validateCompany,
       classifyTerminalStatus,
       detectCountry,
+      parseAsUkTime, fmtServerTime,
     };
   }
 })();

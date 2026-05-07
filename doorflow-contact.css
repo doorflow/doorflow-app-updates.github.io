@@ -401,15 +401,16 @@
 
   /* === Icon swapping inside .call-option === */
    .df-contact .call-option .call-option-icon-tick, .df-contact .call-option .call-option-icon-cross, .df-contact .call-option .call-option-icon-clock { display: none; }
-   .df-contact .call-option[data-state="connected"] .call-option-icon-phone, .df-contact .call-option[data-state="cancelled"] .call-option-icon-phone, .df-contact .call-option[data-state="failed"]    .call-option-icon-phone, .df-contact .call-option[data-state="closed"]    .call-option-icon-phone { display: none; }
+   .df-contact .call-option[data-state="connected"] .call-option-icon-phone, .df-contact .call-option[data-state="completed"] .call-option-icon-phone, .df-contact .call-option[data-state="cancelled"] .call-option-icon-phone, .df-contact .call-option[data-state="failed"]    .call-option-icon-phone, .df-contact .call-option[data-state="closed"]    .call-option-icon-phone { display: none; }
    .df-contact .call-option[data-state="connected"] .call-option-icon-tick { display: block; animation: pop-in .3s var(--ease) both; }
+   .df-contact .call-option[data-state="completed"] .call-option-icon-tick { display: block; animation: pop-in .3s var(--ease) both; }
    .df-contact .call-option[data-state="cancelled"] .call-option-icon-cross { display: block; }
    .df-contact .call-option[data-state="failed"]    .call-option-icon-cross { display: block; animation: pop-in .3s var(--ease) both; }
    .df-contact .call-option[data-state="closed"]    .call-option-icon-clock { display: block; }
    .df-contact .call-option[data-state="dialling"]  .call-option-icon-phone, .df-contact .call-option[data-state="ringing"]   .call-option-icon-phone { animation: ring-shake 1.4s ease-in-out infinite; }
 
   /* === Icon background by state === */
-   .df-contact .call-option[data-state="dialling"]  .option-icon, .df-contact .call-option[data-state="ringing"]   .option-icon, .df-contact .call-option[data-state="connected"] .option-icon { background: var(--brand); color: white; }
+   .df-contact .call-option[data-state="dialling"]  .option-icon, .df-contact .call-option[data-state="ringing"]   .option-icon, .df-contact .call-option[data-state="connected"] .option-icon, .df-contact .call-option[data-state="completed"] .option-icon { background: var(--brand); color: white; }
    .df-contact .call-option[data-state="cancelled"] .option-icon, .df-contact .call-option[data-state="failed"]    .option-icon { background: var(--ink-3); color: white; }
    .df-contact .call-option[data-state="closed"]    .option-icon { background: var(--surface-2); color: var(--ink-3); }
 
@@ -519,7 +520,7 @@
    .df-contact .call-option[data-state="closed"] .option-name { color: var(--ink-2); }
    .df-contact .call-option[data-state="closed"] .option-desc { color: var(--ink-3); }
   /* Active call states: not clickable, no chevron, calmer background. */
-   .df-contact .call-option[data-state="dialling"], .df-contact .call-option[data-state="ringing"], .df-contact .call-option[data-state="connected"], .df-contact .call-option[data-state="cancelled"], .df-contact .call-option[data-state="failed"] {
+   .df-contact .call-option[data-state="dialling"], .df-contact .call-option[data-state="ringing"], .df-contact .call-option[data-state="connected"], .df-contact .call-option[data-state="completed"], .df-contact .call-option[data-state="cancelled"], .df-contact .call-option[data-state="failed"] {
     cursor: default;
     background: var(--brand-soft);
     border-color: #c8ddd4;
@@ -528,11 +529,11 @@
     background: var(--surface-2);
     border-color: var(--line);
   }
-   .df-contact .call-option[data-state="dialling"]  .option-arrow, .df-contact .call-option[data-state="ringing"]   .option-arrow, .df-contact .call-option[data-state="connected"] .option-arrow, .df-contact .call-option[data-state="cancelled"] .option-arrow, .df-contact .call-option[data-state="failed"]    .option-arrow { display: none; }
+   .df-contact .call-option[data-state="dialling"]  .option-arrow, .df-contact .call-option[data-state="ringing"]   .option-arrow, .df-contact .call-option[data-state="connected"] .option-arrow, .df-contact .call-option[data-state="completed"] .option-arrow, .df-contact .call-option[data-state="cancelled"] .option-arrow, .df-contact .call-option[data-state="failed"]    .option-arrow { display: none; }
   /* Failed — red title only, body stays neutral so it doesn't read as
      a separate "alert" object. */
    .df-contact .call-option[data-state="failed"] .option-name { color: #7a2418; }
-   .df-contact .call-option[data-state="connected"] .option-name { color: var(--brand-2); }
+   .df-contact .call-option[data-state="connected"] .option-name, .df-contact .call-option[data-state="completed"] .option-name { color: var(--brand-2); }
 
   /* ============================================
      Timezone chip on calendar
