@@ -59,7 +59,23 @@
     };
   })();
 
-  LOG.log("session", "boot", { ua: navigator.userAgent, href: location.href });
+  /* Build version stamp.
+     The string "2026-05-07T09:39:17Z" is replaced at build time with an
+     ISO timestamp + short hash. If you ever see the literal token
+     below in the console, it means the file was deployed without
+     going through the build (run `node build.mjs`). */
+  const BUILD_VERSION = "2026-05-07T09:39:17Z";
+
+  // Always log the version on boot — both as a structured field on the
+  // session.boot event and as a separate banner line so it's easy to
+  // spot at a glance when scrolling the console.
+  console.log("%c[doorflow] build %c" + BUILD_VERSION,
+    "color:#1c7e63;font-weight:600", "color:#4b5563");
+  LOG.log("session", "boot", {
+    version: BUILD_VERSION,
+    ua: navigator.userAgent,
+    href: location.href,
+  });
 
   /* ============================================
      Session persistence
@@ -1303,6 +1319,7 @@
   let callbackAvailable = null;   // null = unknown, true = open, false = closed
   let callbackNextOpen = null;
   let availabilityPollHandle = null;
+  let closedStateTickHandle = null;
 
   /* How often we re-check availability while step 3 is visible. The
      widget config could change at any time on the connect.doorflow.com
@@ -1364,12 +1381,34 @@
       checkCallbackAvailability();
     }, AVAILABILITY_POLL_MS);
     LOG.log("call", "availability_polling_started", { intervalMs: AVAILABILITY_POLL_MS });
+    // Separate clock tick: even between server polls, re-render the
+    // closed-state message so we transition smoothly between buckets
+    // ("Next open at 10:30" → "Opening soon" → "Opening any moment
+    // now" → "Lines should be open by now"). Cheap to run every 15s.
+    if (closedStateTickHandle) clearInterval(closedStateTickHandle);
+    closedStateTickHandle = setInterval(() => {
+      if (state.step !== 3) return;
+      if (activeCallRequestId) return;
+      // Only refresh if we're in the closed state — no point doing work
+      // for the ready/active states which don't depend on wall clock.
+      const el = document.getElementById("df-callNowBtn");
+      if (el && el.dataset.state === "closed") refreshCallbackButton();
+      else if (el && el.dataset.state === "ready" && callbackAvailable === false) {
+        // We've already optimistically flipped to ready (server stale
+        // case). Don't refresh — leave the user's potential click
+        // intact. Next server poll will re-evaluate.
+      }
+    }, 15_000);
   }
   function stopAvailabilityPolling() {
     if (availabilityPollHandle) {
       clearInterval(availabilityPollHandle);
       availabilityPollHandle = null;
       LOG.log("call", "availability_polling_stopped", {});
+    }
+    if (closedStateTickHandle) {
+      clearInterval(closedStateTickHandle);
+      closedStateTickHandle = null;
     }
   }
 
@@ -1405,24 +1444,65 @@
     if (!forceReset && active.includes(el.dataset.state)) return;
 
     if (callbackAvailable === false) {
-      el.dataset.state = "closed";
-      el.setAttribute("aria-disabled", "true");
-      el.removeAttribute("tabindex");
-      title.textContent = "Lines are closed right now";
-      let when = "You can still book a meeting above.";
-      if (callbackNextOpen) {
-        try {
-          // Server returns wall-clock UK times labelled as "Z" — see
-          // parseAsUkTime for the workaround.
-          const t = parseAsUkTime(callbackNextOpen);
-          if (t) {
-            const day = t.toLocaleDateString("en-GB", { weekday: "long", timeZone: "Europe/London" });
-            const time = t.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", timeZone: "Europe/London" });
-            when = `Next open at ${time} on ${day}.`;
+      // Grade the closed-state message by how the announced open time
+      // compares to the wall clock. The server can lag — it sometimes
+      // keeps reporting closed past its own announced open time. We
+      // adapt the message so the user isn't staring at a stale "Next
+      // open at 10:30" five minutes after 10:30. If the server is
+      // significantly past its announced open time, we trust the
+      // wall clock more than the server and let the user try a call.
+      const nextOpenDate = callbackNextOpen ? parseAsUkTime(callbackNextOpen) : null;
+      const minsUntilOpen = nextOpenDate ? (nextOpenDate.getTime() - Date.now()) / 60_000 : null;
+
+      if (nextOpenDate && minsUntilOpen !== null && minsUntilOpen <= -2) {
+        // Announced open time is more than 2 minutes in the past —
+        // the server's metadata is stale. Surface this honestly and
+        // let the user try a call. If the lines genuinely are still
+        // closed, the call API will say so and we'll show the error
+        // properly. Better than a never-ending "closed" wall.
+        el.dataset.state = "ready";
+        el.removeAttribute("aria-disabled");
+        el.setAttribute("tabindex", "0");
+        title.textContent = "Lines should be open by now";
+        desc.textContent = "We'll try to put your call through anyway.";
+      } else {
+        el.dataset.state = "closed";
+        el.setAttribute("aria-disabled", "true");
+        el.removeAttribute("tabindex");
+
+        let titleText = "Lines are closed right now";
+        let when = "You can still book a meeting above.";
+
+        if (nextOpenDate && minsUntilOpen !== null) {
+          const time = nextOpenDate.toLocaleTimeString("en-GB", {
+            hour: "numeric", minute: "2-digit", timeZone: "Europe/London",
+          });
+          if (minsUntilOpen <= 0) {
+            // 0–2 minutes in the past — server's about to flip, just
+            // a small hold message.
+            titleText = "Opening any moment now";
+            when = "We're checking — we'll let you know.";
+          } else if (minsUntilOpen <= 5) {
+            // Within 5 minutes — warmer tone, give them confidence.
+            titleText = "Opening soon";
+            when = `Lines open at ${time}.`;
+          } else {
+            // Genuine future open time — formal scheduled message.
+            const day = nextOpenDate.toLocaleDateString("en-GB", {
+              weekday: "long", timeZone: "Europe/London",
+            });
+            // Same-day vs other-day — drop the day name if it's today.
+            const today = new Date().toLocaleDateString("en-GB", {
+              weekday: "long", timeZone: "Europe/London",
+            });
+            when = day === today
+              ? `Next open at ${time}.`
+              : `Next open at ${time} on ${day}.`;
           }
-        } catch (e) {}
+        }
+        title.textContent = titleText;
+        desc.textContent = when;
       }
-      desc.textContent = when;
     } else {
       el.dataset.state = "ready";
       el.removeAttribute("aria-disabled");
