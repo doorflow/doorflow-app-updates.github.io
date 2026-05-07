@@ -1,0 +1,1114 @@
+/* ============================================
+     Tokens
+     ============================================ */
+  .df-contact {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #fafaf7;
+    --ink: #11161c;
+    --ink-2: #4b5563;
+    --ink-3: #8a93a0;
+    --line: #ececea;
+    --line-2: #d8d8d4;
+    --accent: #11161c;
+    --accent-soft: #f4f4f1;
+    --brand: #1c7e63;
+    --brand-2: #155d4a;
+    --brand-soft: #e8f1ee;
+    --danger: #c4392b;
+    --danger-soft: #fdecea;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+  }
+
+   .df-contact * { box-sizing: border-box; }
+   /* removed: html/body rules don't apply inside scoped wrapper */
+
+   /* removed: html/body rules don't apply inside scoped wrapper */
+   /* hoisted from body to wrapper */ .df-contact { background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    overflow: hidden; }
+
+   .df-contact a { color: var(--brand); text-decoration: none; }
+   .df-contact a:hover { text-decoration: underline; }
+   .df-contact button { font-family: inherit; }
+
+  /* ============================================
+     Header — brand + step context
+     ============================================ */
+   .df-contact .topbar {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+   .df-contact .brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+   .df-contact .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    flex: 0 0 auto;
+  }
+   .df-contact .brand-dot { width: 8px; height: 8px; background: var(--brand); border-radius: 50%; }
+
+   .df-contact .brand-context {
+    color: var(--ink-3);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    transition: opacity .25s var(--ease);
+  }
+   .df-contact .brand-context.is-empty { opacity: 0; pointer-events: none; }
+   .df-contact .brand-context::before {
+    content: "·";
+    color: var(--ink-3);
+    flex: 0 0 auto;
+  }
+   .df-contact .brand-context-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-2);
+  }
+
+   .df-contact .topbar-meta { font-size: 13px; color: var(--ink-3); flex: 0 0 auto; }
+
+  @media (max-width: 520px) {
+     .df-contact .brand-context-text { max-width: 160px; }
+  }
+
+  /* ============================================
+     Progress
+     ============================================ */
+   .df-contact .progress {
+    flex: 0 0 auto;
+    height: 2px;
+    background: var(--line);
+    width: 100%;
+  }
+   .df-contact .progress-fill {
+    height: 100%;
+    background: var(--ink);
+    width: 33%;
+    transition: width .5s var(--ease);
+  }
+
+  /* ============================================
+     Stage
+     ============================================ */
+   .df-contact .stage {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 24px 20px 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+   .df-contact .panel {
+    display: none;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+   .df-contact .panel.is-active {
+    display: flex;
+    animation: slide-in .35s var(--ease) both;
+  }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+   .df-contact .panel-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+  }
+
+   .df-contact .actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 0 calc(20px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    margin-top: auto;
+  }
+
+   .df-contact .stage-head { margin-bottom: 24px; }
+   .df-contact .step-count {
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+   .df-contact h1.title {
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+   .df-contact .lede { font-size: 15px; color: var(--ink-2); margin: 0; }
+
+  /* ============================================
+     Options (step 1) and call options (step 3)
+     ============================================ */
+   .df-contact .options { display: flex; flex-direction: column; gap: 10px; }
+
+   .df-contact .option {
+    width: 100%;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    cursor: pointer;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color .2s var(--ease), background .2s var(--ease), transform .12s var(--ease);
+    text-decoration: none;
+    font-family: inherit;
+  }
+   .df-contact .option:hover { border-color: var(--line-2); background: var(--surface-2); text-decoration: none; }
+   .df-contact .option:active { transform: scale(0.995); }
+   .df-contact .option.selected { border-color: var(--ink); }
+   .df-contact .option.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+   .df-contact .option-icon {
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    transition: background .2s var(--ease), color .2s var(--ease);
+  }
+   .df-contact .option.selected .option-icon { background: var(--ink); color: white; }
+   .df-contact .option-icon svg { width: 20px; height: 20px; }
+
+   .df-contact .option-body { flex: 1; min-width: 0; }
+   .df-contact .option-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 2px;
+    letter-spacing: -0.005em;
+  }
+   .df-contact .option-desc {
+    font-size: 13.5px;
+    color: var(--ink-3);
+    margin: 0;
+    line-height: 1.4;
+  }
+   .df-contact .option-tick {
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-2);
+    transition: all .2s var(--ease);
+    position: relative;
+  }
+   .df-contact .option.selected .option-tick { background: var(--ink); border-color: var(--ink); }
+   .df-contact .option.selected .option-tick::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+    background-size: 12px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  /* For non-selectable options (step 3 call buttons), the tick area
+     becomes a chevron arrow indicating "go". */
+   .df-contact .option-arrow {
+    flex: 0 0 auto;
+    color: var(--ink-3);
+    transition: transform .15s var(--ease), color .15s var(--ease);
+  }
+   .df-contact .option:hover .option-arrow {
+    transform: translateX(2px);
+    color: var(--ink);
+  }
+
+   .df-contact .option-divider {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-3);
+    margin: 14px 0 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    position: relative;
+  }
+   .df-contact .option-divider::before, .df-contact .option-divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 28px);
+    height: 1px;
+    background: var(--line);
+  }
+   .df-contact .option-divider::before { left: 0; }
+   .df-contact .option-divider::after { right: 0; }
+
+   .df-contact .option-help {
+    background: var(--surface-2);
+    border-style: dashed;
+  }
+   .df-contact .option-help .option-icon { background: white; }
+
+  /* ============================================
+     Form (step 2)
+     ============================================ */
+   .df-contact .form { display: flex; flex-direction: column; gap: 14px; }
+   .df-contact .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+   .df-contact .form-row-phone { display: grid; grid-template-columns: 1fr 96px; gap: 10px; }
+
+   .df-contact .field { display: flex; flex-direction: column; gap: 6px; }
+   .df-contact .field label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+   .df-contact .field input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--ink);
+    transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
+  }
+   .df-contact .field input::placeholder { color: var(--ink-3); }
+   .df-contact .field input:hover { border-color: var(--line-2); }
+   .df-contact .field input:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(17, 22, 28, 0.06);
+  }
+
+   .df-contact .field.has-error input {
+    border-color: var(--danger);
+    background: var(--danger-soft);
+  }
+   .df-contact .field.has-error input:focus {
+    box-shadow: 0 0 0 3px rgba(196, 57, 43, 0.12);
+  }
+   .df-contact .field-error {
+    font-size: 12.5px;
+    color: var(--danger);
+    line-height: 1.4;
+    display: none;
+    align-items: center;
+    gap: 5px;
+  }
+   .df-contact .field.has-error .field-error { display: flex; }
+   .df-contact .field.has-error .hint { display: none; }
+   .df-contact .field-error svg { flex: 0 0 auto; }
+
+   .df-contact .field .hint {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.4;
+  }
+
+  /* E.164 preview — visually elevated. Brand-coloured pill so the user
+     notices "yes, we got your number right". */
+   .df-contact .phone-confirm {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 8px 12px;
+    background: var(--brand-soft);
+    border: 1px solid #c8ddd4;
+    border-radius: 8px;
+    color: var(--brand-2);
+    font-size: 13px;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+    animation: phone-confirm-in .3s var(--ease) both;
+  }
+   .df-contact .phone-confirm.is-visible { display: inline-flex; }
+   .df-contact .phone-confirm strong {
+    color: var(--brand-2);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+   .df-contact .phone-confirm svg { flex: 0 0 auto; color: var(--brand); }
+  @keyframes phone-confirm-in {
+    from { opacity: 0; transform: translateY(-2px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     Call-option state machine
+     ============================================
+     The "Call me now" element is a single morphing object. Its
+     data-state controls everything: icon, title styling, body
+     contents, click behaviour, action buttons.
+
+     States and their visual treatment:
+       ready      — clickable option row, phone icon, hover affordance
+       closed     — same shape but dimmed, clock icon, not clickable
+       dialling   — pill-like, brand-coloured icon, pulse + dots, no actions yet
+       ringing    — same as dialling but "Cancel call" appears
+       connected  — tick icon, "All done" link
+       cancelled  — neutral, cross icon, "All done"
+       failed     — neutral pill with red title + cross icon, "Try again" / "Open form"
+
+     Why not a real <button>: the in-call states contain interactive
+     children (Cancel, Try again etc.) so we use role="button" on a div. */
+
+  /* === Icon swapping inside .call-option === */
+   .df-contact .call-option .call-option-icon-tick, .df-contact .call-option .call-option-icon-cross, .df-contact .call-option .call-option-icon-clock { display: none; }
+   .df-contact .call-option[data-state="connected"] .call-option-icon-phone, .df-contact .call-option[data-state="cancelled"] .call-option-icon-phone, .df-contact .call-option[data-state="failed"]    .call-option-icon-phone, .df-contact .call-option[data-state="closed"]    .call-option-icon-phone { display: none; }
+   .df-contact .call-option[data-state="connected"] .call-option-icon-tick { display: block; animation: pop-in .3s var(--ease) both; }
+   .df-contact .call-option[data-state="cancelled"] .call-option-icon-cross { display: block; }
+   .df-contact .call-option[data-state="failed"]    .call-option-icon-cross { display: block; animation: pop-in .3s var(--ease) both; }
+   .df-contact .call-option[data-state="closed"]    .call-option-icon-clock { display: block; }
+   .df-contact .call-option[data-state="dialling"]  .call-option-icon-phone, .df-contact .call-option[data-state="ringing"]   .call-option-icon-phone { animation: ring-shake 1.4s ease-in-out infinite; }
+
+  /* === Icon background by state === */
+   .df-contact .call-option[data-state="dialling"]  .option-icon, .df-contact .call-option[data-state="ringing"]   .option-icon, .df-contact .call-option[data-state="connected"] .option-icon { background: var(--brand); color: white; }
+   .df-contact .call-option[data-state="cancelled"] .option-icon, .df-contact .call-option[data-state="failed"]    .option-icon { background: var(--ink-3); color: white; }
+   .df-contact .call-option[data-state="closed"]    .option-icon { background: var(--surface-2); color: var(--ink-3); }
+
+  /* === Pulsing ring around the icon during active dial === */
+   .df-contact .call-option-pulse {
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    border: 2px solid var(--brand);
+    opacity: 0;
+    pointer-events: none;
+  }
+   .df-contact .call-option .option-icon { position: relative; }
+   .df-contact .call-option[data-state="dialling"] .call-option-pulse, .df-contact .call-option[data-state="ringing"]  .call-option-pulse {
+    animation: pulse-ring 1.6s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0%   { transform: scale(0.95); opacity: 0.55; }
+    100% { transform: scale(1.28); opacity: 0; }
+  }
+  @keyframes ring-shake {
+    0%, 100%      { transform: rotate(0); }
+    8%, 24%       { transform: rotate(-12deg); }
+    16%, 32%      { transform: rotate(12deg); }
+    40%           { transform: rotate(0); }
+  }
+  @keyframes pop-in {
+    0%   { transform: scale(0.6); opacity: 0; }
+    60%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* === Three-dot indicator === */
+   .df-contact .call-option-dots {
+    display: none;
+    margin-top: 8px;
+    gap: 4px;
+    align-items: center;
+    height: 8px;
+  }
+   .df-contact .call-option[data-state="dialling"] .call-option-dots, .df-contact .call-option[data-state="ringing"]  .call-option-dots { display: inline-flex; }
+   .df-contact .call-option-dots span {
+    width: 5px; height: 5px;
+    background: currentColor;
+    border-radius: 50%;
+    opacity: 0.35;
+    animation: dot-bounce 1.2s ease-in-out infinite;
+  }
+   .df-contact .call-option-dots span:nth-child(2) { animation-delay: 0.15s; }
+   .df-contact .call-option-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dot-bounce {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.35; }
+    40%           { transform: scale(1.0); opacity: 1; }
+  }
+
+  /* === Action links inside the option === */
+   .df-contact .call-option-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+   .df-contact .call-option-actions:empty { display: none; }
+  /* In ready/closed states there are no actions to show, even if the
+     hidden buttons are technically present — collapse the row entirely. */
+   .df-contact .call-option[data-state="ready"]  .call-option-actions, .df-contact .call-option[data-state="closed"] .call-option-actions { display: none; }
+   .df-contact .callback-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 0, 0, 0.2);
+    text-underline-offset: 2px;
+    transition: text-decoration-color .15s var(--ease);
+  }
+   .df-contact .callback-link:hover { text-decoration-color: currentColor; }
+   .df-contact .callback-link[hidden] { display: none; }
+
+  /* === State-specific row appearance === */
+  /* Hover/active affordance only when the row is actually clickable. */
+   .df-contact .call-option[data-state="ready"]:hover {
+    border-color: var(--line-2);
+    background: var(--surface-2);
+  }
+   .df-contact .call-option[data-state="ready"]:active { transform: scale(0.995); }
+   .df-contact .call-option[data-state="ready"]:focus-visible {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(17, 22, 28, 0.08);
+  }
+  /* Closed: dim, no hover lift, clock icon, hide the chevron. */
+   .df-contact .call-option[data-state="closed"] {
+    cursor: not-allowed;
+    background: var(--surface-2);
+  }
+   .df-contact .call-option[data-state="closed"]:hover {
+    transform: none;
+    background: var(--surface-2);
+    border-color: var(--line);
+  }
+   .df-contact .call-option[data-state="closed"] .option-arrow { display: none; }
+   .df-contact .call-option[data-state="closed"] .option-name { color: var(--ink-2); }
+   .df-contact .call-option[data-state="closed"] .option-desc { color: var(--ink-3); }
+  /* Active call states: not clickable, no chevron, calmer background. */
+   .df-contact .call-option[data-state="dialling"], .df-contact .call-option[data-state="ringing"], .df-contact .call-option[data-state="connected"], .df-contact .call-option[data-state="cancelled"], .df-contact .call-option[data-state="failed"] {
+    cursor: default;
+    background: var(--brand-soft);
+    border-color: #c8ddd4;
+  }
+   .df-contact .call-option[data-state="cancelled"], .df-contact .call-option[data-state="failed"] {
+    background: var(--surface-2);
+    border-color: var(--line);
+  }
+   .df-contact .call-option[data-state="dialling"]  .option-arrow, .df-contact .call-option[data-state="ringing"]   .option-arrow, .df-contact .call-option[data-state="connected"] .option-arrow, .df-contact .call-option[data-state="cancelled"] .option-arrow, .df-contact .call-option[data-state="failed"]    .option-arrow { display: none; }
+  /* Failed — red title only, body stays neutral so it doesn't read as
+     a separate "alert" object. */
+   .df-contact .call-option[data-state="failed"] .option-name { color: #7a2418; }
+   .df-contact .call-option[data-state="connected"] .option-name { color: var(--brand-2); }
+
+  /* ============================================
+     Timezone chip on calendar
+     ============================================ */
+   .df-contact .tz-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-2);
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: 4px;
+    transition: border-color .15s var(--ease), background .15s var(--ease);
+    font-family: inherit;
+  }
+   .df-contact .tz-chip:hover { border-color: var(--ink-2); background: white; }
+   .df-contact .tz-chip svg { opacity: 0.5; }
+
+   .df-contact .tz-popover {
+    position: absolute;
+    z-index: 50;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    padding: 6px;
+    min-width: 240px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 4px;
+    animation: phone-confirm-in .2s var(--ease) both;
+  }
+   .df-contact .tz-popover[hidden] { display: none; }
+   .df-contact .tz-popover-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--ink);
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    transition: background .12s var(--ease);
+  }
+   .df-contact .tz-popover-row:hover { background: var(--accent-soft); }
+   .df-contact .tz-popover-row.is-current {
+    background: var(--accent-soft);
+    font-weight: 500;
+  }
+   .df-contact .tz-popover-row .tz-offset {
+    color: var(--ink-3);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============================================
+     Attendees on confirmation
+     ============================================ */
+   .df-contact .attendees-block {
+    margin-top: 18px;
+    border-top: 1px dashed var(--line);
+    padding-top: 18px;
+  }
+   .df-contact .attendees-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--brand);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+   .df-contact .attendees-toggle:hover { text-decoration: underline; }
+   .df-contact .attendees-toggle svg { transition: transform .2s var(--ease); }
+   .df-contact .attendees-toggle.is-open svg { transform: rotate(45deg); }
+   .df-contact .attendees-form {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+   .df-contact .attendees-form[hidden] { display: none; }
+  /* First name + last name + email + remove. The auto column for the
+     remove button is constrained tightly so it doesn't get pushed by
+     long emails — emails truncate visually rather than steal space. */
+   .df-contact .attendee-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.5fr 32px;
+    gap: 6px;
+    align-items: start;
+  }
+   .df-contact .attendee-row input {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--ink);
+    transition: border-color .15s var(--ease);
+    min-width: 0;     /* lets inputs shrink inside the grid */
+  }
+   .df-contact .attendee-row input:focus { outline: none; border-color: var(--ink); }
+   .df-contact .attendee-row input.has-error { border-color: var(--danger); background: var(--danger-soft); }
+   .df-contact .attendee-row .row-remove {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    cursor: pointer;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s var(--ease), color .15s var(--ease);
+    align-self: center;
+    padding: 0;
+  }
+   .df-contact .attendee-row .row-remove:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* On narrow screens the row stacks: names on row 1, email + remove on row 2. */
+  @media (max-width: 480px) {
+     .df-contact .attendee-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "fname lname"
+        "email remove";
+      column-gap: 6px;
+      row-gap: 6px;
+    }
+     .df-contact .attendee-row > input:nth-of-type(1) { grid-area: fname; }
+     .df-contact .attendee-row > input:nth-of-type(2) { grid-area: lname; }
+     .df-contact .attendee-row > input:nth-of-type(3) { grid-area: email; }
+     .df-contact .attendee-row > .row-remove { grid-area: remove; justify-self: end; }
+  }
+   .df-contact .attendee-add-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 13px;
+  }
+   .df-contact .attendee-add-btn {
+    background: none;
+    border: none;
+    color: var(--brand);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+   .df-contact .attendee-add-btn:hover { text-decoration: underline; }
+   .df-contact .attendees-status {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-left: auto;
+    transition: color .2s var(--ease);
+  }
+   .df-contact .attendees-status.is-saved { color: var(--brand); }
+
+  /* ============================================
+     Confirmation actions (calendar downloads, start over)
+     ============================================ */
+   .df-contact .confirm-actions {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+   .df-contact .confirm-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    font-size: 13px;
+  }
+   .df-contact .confirm-actions-label {
+    color: var(--ink-3);
+    font-weight: 500;
+    margin-right: 4px;
+  }
+   .df-contact .confirm-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    transition: border-color .15s var(--ease), background .15s var(--ease);
+  }
+   .df-contact .confirm-action-link:hover {
+    border-color: var(--ink);
+    background: var(--surface-2);
+    text-decoration: none;
+  }
+   .df-contact .confirm-action-link svg { color: var(--ink-3); }
+   .df-contact .confirm-startover {
+    background: none;
+    border: none;
+    color: var(--ink-3);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    align-self: flex-start;
+    transition: color .15s var(--ease);
+  }
+   .df-contact .confirm-startover:hover { color: var(--ink); }
+
+  /* Honeypot */
+   .df-contact .hp {
+    position: absolute !important;
+    left: -10000px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+  }
+
+   .df-contact .callout {
+    background: var(--brand-soft);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-top: 6px;
+    font-size: 13.5px;
+    color: #1a4a3c;
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+   .df-contact .callout svg { flex: 0 0 auto; margin-top: 1px; color: var(--brand); }
+   .df-contact .callout strong { color: #143329; font-weight: 600; }
+
+  /* ============================================
+     Booking (step 3)
+     ============================================ */
+   .df-contact .booking-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+   .df-contact .cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+   .df-contact .cal-month { font-weight: 600; font-size: 14.5px; }
+   .df-contact .cal-nav { display: flex; gap: 4px; }
+   .df-contact .cal-nav button {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s var(--ease);
+  }
+   .df-contact .cal-nav button:hover:not(:disabled) { border-color: var(--ink); }
+   .df-contact .cal-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+   .df-contact .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+   .df-contact .dow {
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: center;
+    padding: 4px 0 6px;
+    font-weight: 500;
+  }
+   .df-contact .day {
+    aspect-ratio: 1;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--ink);
+    cursor: pointer;
+    position: relative;
+    transition: background .12s var(--ease), color .12s var(--ease);
+  }
+   .df-contact .day:hover:not(:disabled) { background: var(--accent-soft); }
+   .df-contact .day:disabled { color: var(--ink-3); opacity: 0.35; cursor: not-allowed; }
+   .df-contact .day.has-slots::after {
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px; height: 3px;
+    background: var(--brand);
+    border-radius: 50%;
+  }
+   .df-contact .day.selected { background: var(--ink); color: white; }
+   .df-contact .day.selected::after { background: white; }
+
+   .df-contact .slots-section { margin-top: 14px; }
+   .df-contact .slots-header {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+   .df-contact .slots-header strong { color: var(--ink); font-weight: 600; }
+   .df-contact .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+   .df-contact .slot {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 9px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--ink);
+    text-align: center;
+    transition: border-color .12s var(--ease), background .12s var(--ease), color .12s var(--ease);
+  }
+   .df-contact .slot:hover { border-color: var(--ink); }
+   .df-contact .slot.selected { background: var(--ink); color: white; border-color: var(--ink); }
+   .df-contact .slots-empty { grid-column: 1/-1; color: var(--ink-3); font-size: 13px; }
+
+   .df-contact .or-talk-now {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-3);
+    margin: 18px 0 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    position: relative;
+  }
+   .df-contact .or-talk-now::before, .df-contact .or-talk-now::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 90px);
+    height: 1px;
+    background: var(--line);
+  }
+   .df-contact .or-talk-now::before { left: 0; }
+   .df-contact .or-talk-now::after { right: 0; }
+
+  /* ============================================
+     Confirmation
+     ============================================ */
+   .df-contact .confirm-mark {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0 22px;
+    animation: pop .5s var(--ease) both;
+  }
+  @keyframes pop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+   .df-contact .confirm-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-top: 18px;
+  }
+   .df-contact .confirm-card dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 18px;
+    row-gap: 8px;
+    font-size: 14px;
+  }
+   .df-contact .confirm-card dt {
+    color: var(--ink-3);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding-top: 2px;
+    font-weight: 500;
+  }
+   .df-contact .confirm-card dd { margin: 0; color: var(--ink); }
+   .df-contact .confirm-foot {
+    margin-top: 18px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  /* Action bar buttons */
+   .df-contact .btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 15px;
+    border-radius: 10px;
+    padding: 13px 20px;
+    transition: background .15s var(--ease), color .15s var(--ease), opacity .15s var(--ease);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    line-height: 1;
+  }
+   .df-contact .btn-primary {
+    background: var(--ink);
+    color: white;
+    flex: 1;
+    position: relative;
+  }
+   .df-contact .btn-primary:hover:not(:disabled) { background: #000; }
+   .df-contact .btn-primary:disabled {
+    background: var(--line-2);
+    color: var(--surface);
+    cursor: not-allowed;
+  }
+
+  /* The hint that appears above the CTA during auto-progress wait. */
+   .df-contact .auto-hint {
+    font-size: 12px;
+    color: var(--ink-3);
+    text-align: right;
+    margin-bottom: 8px;
+    margin-top: -12px;
+    height: 16px;
+    opacity: 0;
+    transition: opacity .2s var(--ease);
+    line-height: 16px;
+  }
+   .df-contact .auto-hint.is-visible { opacity: 1; }
+   .df-contact .auto-hint button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(0,0,0,0.3);
+    text-underline-offset: 2px;
+    margin-left: 4px;
+  }
+  /* Subtle pulse on the primary CTA when the form has just become
+     valid — draws attention without blocking. Stops on hover/focus. */
+   .df-contact .btn-primary.btn-pulse {
+    animation: btn-pulse 2s ease-in-out 1;
+    box-shadow: 0 0 0 0 rgba(28, 126, 99, 0.5);
+  }
+  @keyframes btn-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(28, 126, 99, 0.5); }
+    40%  { box-shadow: 0 0 0 12px rgba(28, 126, 99, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(28, 126, 99, 0); }
+  }
+   .df-contact .btn-primary.btn-pulse:hover, .df-contact .btn-primary.btn-pulse:focus {
+    animation: none;
+  }
+   .df-contact .btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
+    padding: 13px 12px;
+  }
+   .df-contact .btn-ghost:hover { color: var(--ink); }
+
+  @media (min-width: 721px) {
+     .df-contact .stage { padding-top: 56px; max-width: 560px; }
+     .df-contact h1.title { font-size: 30px; }
+     .df-contact .topbar { padding: 20px 32px; }
+  }
+
+  /* ============================================
+     Mobile responsive — tighter spacing for narrow viewports.
+     Tested against iPhone 14 Pro at 393px.
+     ============================================ */
+  @media (max-width: 480px) {
+     .df-contact .topbar { padding: 14px 16px; }
+     .df-contact .stage { padding: 18px 16px 0; }
+
+    /* Phone + ext row: stack on very narrow screens so the ext field
+       gets full-width tap area instead of squeezing the phone field. */
+     .df-contact .form-row-phone {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    /* Calendar/booking card: trim padding so the day grid fills the
+       width comfortably. */
+     .df-contact .booking-card { padding: 14px; }
+
+    /* Timezone popover: anchor to right edge of chip so it doesn't
+       overflow. Set explicit right:0 and override the absolute
+       positioning. The wrapper span is position:relative, so this
+       works as expected. */
+     .df-contact .tz-popover {
+      right: 0;
+      left: auto;
+      min-width: 200px;
+      max-width: calc(100vw - 40px);
+    }
+
+    /* Time-slot grid: keep 3 columns but reduce gap. 2 cols would be
+       tappier but eats vertical space and makes the picker feel long. */
+     .df-contact .slots { gap: 5px; }
+     .df-contact .slot { padding: 10px 4px; font-size: 13px; }
+
+    /* "Other ways to talk" + attendee rows already stack via their
+       own grid-template rules below 540px. */
+
+    /* Confirmation card: trim row gap and font slightly. */
+     .df-contact .confirm-card dl { column-gap: 12px; row-gap: 6px; font-size: 13.5px; }
+
+    /* Stage head: smaller margin so the form starts higher. */
+     .df-contact .stage-head { margin-bottom: 18px; }
+
+    /* Confirm-actions row: stack the calendar links on tight widths
+       instead of cramming them onto one line. */
+     .df-contact .confirm-actions-row { flex-wrap: wrap; gap: 8px; }
+  }
+
+  /* Belt-and-braces: never let any single element cause a horizontal
+     scroll. The page itself is overflow:hidden but inner elements
+     could still report a wider scrollWidth. */
+   .df-contact .panel-body { overflow-x: hidden; }
+
+  @media (prefers-reduced-motion: reduce) {
+     .df-contact *, .df-contact *::before, .df-contact *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Hide the c2c widget's floating "call us" bubble. We keep the
+     embed script loaded so window.callWidgetInstance is available as
+     a fallback (the "Open the call form" button uses it), but we
+     don't want the duplicate floating affordance — our inline call
+     option already covers it. */
+   .df-contact .call-widget-button { display: none !important; }
+   .df-contact .call-widget-modal { display: none; }
+  /* The widget's modal we DO want to show when the user clicks the
+     fallback link, so re-enable it when its .active class is set. */
+   .df-contact .call-widget-modal.active { display: flex !important; }
