@@ -1215,13 +1215,23 @@
   /* ---------------------------------------------
      Server-time workaround
      ---------------------------------------------
-     The connect.doorflow.com widget endpoint returns availability
-     timestamps with a "Z" suffix (suggesting UTC) but the values are
-     actually configured as UK wall-clock times — i.e. when the
-     server says "2026-05-07T18:00:00Z", it really means 18:00
-     Europe/London local, not 18:00 UTC. This is a server bug that
-     should be fixed there eventually, but until then we compensate
-     client-side.
+     TODO(server-time): the connect.doorflow.com widget endpoint
+     returns availability timestamps with a "Z" suffix (suggesting
+     UTC) but the values are actually configured as UK wall-clock
+     times — i.e. when the server says "2026-05-07T18:00:00Z", it
+     really means 18:00 Europe/London local, not 18:00 UTC. This
+     should be fixed on the server side: either return real UTC
+     timestamps, or include an explicit timezone identifier.
+
+     Until then we compensate client-side with parseAsUkTime() and
+     fmtServerTime(). When the server is fixed:
+       1. delete parseAsUkTime, ukOffsetMinutesAt, fmtServerTime
+       2. replace fmtServerTime(callbackNextOpen) calls with
+          new Date(callbackNextOpen).toLocaleString(...)
+       3. update the closed-state display in refreshCallbackButton
+          to use plain new Date() too
+       4. remove this TODO and the related test in tests.mjs
+          (parseAsUkTime suite)
 
      parseAsUkTime(): take the wall-clock components from an ISO
      string and reinterpret them as Europe/London local. Returns a
@@ -1229,11 +1239,7 @@
 
      fmtServerTime(): format a server-provided "Z" timestamp for
      human display, treating the components as UK-local (so 18:00Z
-     displays as 18:00 / 6pm).
-
-     If/when connect.doorflow.com starts returning real UTC
-     timestamps, delete both helpers and switch back to plain
-     `new Date(serverTime)`. */
+     displays as 18:00 / 6pm). */
   function parseAsUkTime(serverIso) {
     if (!serverIso) return null;
     // Strip any zone designator — we treat the wall-clock components

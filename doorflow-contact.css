@@ -538,6 +538,11 @@
   /* ============================================
      Timezone chip on calendar
      ============================================ */
+   .df-contact .tz-chip-wrap {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;     /* don't let the chip get squeezed by the day label */
+  }
    .df-contact .tz-chip {
     display: inline-flex;
     align-items: center;
@@ -550,9 +555,9 @@
     font-size: 11.5px;
     font-weight: 500;
     cursor: pointer;
-    margin-left: 4px;
     transition: border-color .15s var(--ease), background .15s var(--ease);
     font-family: inherit;
+    white-space: nowrap;
   }
    .df-contact .tz-chip:hover { border-color: var(--ink-2); background: white; }
    .df-contact .tz-chip svg { opacity: 0.5; }
@@ -560,12 +565,22 @@
    .df-contact .tz-popover {
     position: absolute;
     z-index: 50;
+    /* Anchor to the right of the chip wrapper so the popover always
+       opens leftward — predictable on every viewport, never clipped
+       on the left because the chip itself sits at the right edge of
+       the slots header. */
+    right: 0;
+    left: auto;
     background: white;
     border: 1px solid var(--line);
     border-radius: 10px;
     box-shadow: var(--shadow-md);
     padding: 6px;
     min-width: 240px;
+    /* Defence-in-depth: never wider than the viewport minus a small
+       gutter, in case some future layout change pushes the chip
+       inward. */
+    max-width: calc(100vw - 32px);
     max-height: 300px;
     overflow-y: auto;
     margin-top: 4px;
@@ -869,7 +884,15 @@
     color: var(--ink-3);
     margin-bottom: 10px;
     font-weight: 500;
+    /* Flex so the timezone chip can sit at the right edge — keeps the
+       popover positionally predictable (always anchored to the right
+       side of the slots area, never near a left edge where it could
+       overflow the viewport). */
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
+   .df-contact .slots-header-label { flex: 1 1 auto; min-width: 0; }
    .df-contact .slots-header strong { color: var(--ink); font-weight: 600; }
    .df-contact .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
    .df-contact .slot {
@@ -1061,13 +1084,11 @@
        width comfortably. */
      .df-contact .booking-card { padding: 14px; }
 
-    /* Timezone popover: anchor to right edge of chip so it doesn't
-       overflow. Set explicit right:0 and override the absolute
-       positioning. The wrapper span is position:relative, so this
-       works as expected. */
+    /* Timezone popover on mobile: tighter min-width and a slightly
+       larger gutter than the desktop default. (Right-anchoring is
+       handled at the base level — the popover always opens leftward
+       from the chip.) */
      .df-contact .tz-popover {
-      right: 0;
-      left: auto;
       min-width: 200px;
       max-width: calc(100vw - 40px);
     }
