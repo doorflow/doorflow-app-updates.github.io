@@ -4,54 +4,86 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DoorFlow Downloads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  body { font-family: "Averta", "Lato", system-ui, -apple-system,
-         "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.55;
-         margin: 0; padding: 3rem 1rem; background: #f6f7f9; color: #111827; }
-  main { max-width: 720px; margin: 0 auto; }
-  h1 { font-size: 1.9rem; color: #0E2653; margin: 0 0 1.75rem; }
+  :root { --navy:#0E2653; --blue:#3765E3; --footer:#1B345F; }
+  * { box-sizing: border-box; }
+  body { font-family: "Lato", system-ui, -apple-system, "Segoe UI", Roboto,
+         sans-serif; font-size: 16px; line-height: 1.6; margin: 0;
+         color: var(--navy); background: #fff; }
+  header { padding: 1.5rem 2rem; border-bottom: 1px solid #F3F4F6; }
+  header .bar { max-width: 960px; margin: 0 auto; display: flex;
+         align-items: center; justify-content: space-between; }
+  header img { height: 30px; display: block; }
+  header .docs { color: var(--navy); text-decoration: none; font-weight: 700;
+         font-size: .9rem; opacity: .8; }
+  header .docs:hover { opacity: 1; }
+  main { max-width: 760px; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+  h1 { font-size: 2rem; font-weight: 900; margin: 0 0 .35rem; }
+  .lede { color: #6B7280; margin: 0 0 2.25rem; }
   .card { background: #fff; border: 1px solid #E5E7EB; border-radius: .75rem;
-          padding: 1.5rem 1.75rem; margin: 0 0 1.5rem;
-          box-shadow: 0 1px 2px rgba(14,38,83,.04); }
-  .card h2 { margin: 0 0 .75rem; font-size: 1.3rem; color: #0E2653; }
-  .notes { color: #374151; font-size: .95rem; margin: 0 0 1.25rem; }
-  .notes ul { padding-left: 1.2rem; margin: .4rem 0; }
+         padding: 1.75rem; margin: 0 0 1.5rem; }
+  .card h2 { margin: 0 0 .9rem; font-size: 1.35rem; font-weight: 700; }
+  .notes { color: #374151; font-size: .95rem; margin: 0 0 1.4rem;
+         border-left: 3px solid #E5E7EB; padding-left: 1rem; }
+  .notes ul { padding-left: 1.15rem; margin: .4rem 0; }
   .notes p { margin: .4rem 0; }
-  .dls { display: flex; flex-direction: column; gap: 1rem; }
-  .row { display: flex; flex-direction: column; gap: .4rem; }
+  .dls { display: flex; flex-direction: column; gap: 1.1rem; }
+  .row { display: flex; flex-direction: column; gap: .45rem; }
   a.dl { align-self: flex-start; display: inline-flex; align-items: baseline;
-         gap: .5rem; text-decoration: none; background: #3765E3; color: #fff;
-         padding: .65rem 1.15rem; border-radius: .5rem; font-weight: 600;
-         transition: background .2s; }
-  a.dl:hover { background: #0E2653; }
+         gap: .5rem; text-decoration: none; background: var(--blue);
+         color: #fff; padding: .7rem 1.25rem; border-radius: .5rem;
+         font-weight: 700; transition: background .15s; }
+  a.dl:hover { background: var(--navy); }
   a.dl .ver { font-weight: 400; font-size: .82rem; opacity: .85; }
   .meta { color: #6B7280; font-size: .82rem; }
-  .sum { font-size: .72rem; color: #6B7280; display: flex; gap: .4rem;
+  .sum { font-size: .72rem; color: #6B7280; display: flex; gap: .45rem;
          align-items: baseline; flex-wrap: wrap; }
-  .sum span { font-weight: 600; letter-spacing: .03em; }
+  .sum span { font-weight: 700; letter-spacing: .04em; }
   .sum code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
          color: #374151; word-break: break-all; }
-  footer { color: #9CA3AF; font-size: .8rem; text-align: center;
-           margin-top: 2.5rem; }
+  footer { background: var(--footer); color: #fff; padding: 2.5rem 2rem; }
+  footer .inner { max-width: 960px; margin: 0 auto; display: flex;
+         flex-wrap: wrap; gap: 1rem 2rem; align-items: center;
+         justify-content: space-between; }
+  footer img { height: 48px; }
+  footer .addr { font-size: .82rem; opacity: .75; line-height: 1.5; }
 </style>
 </head>
 <body>
+<header>
+  <div class="bar">
+    <a href="/"><img src="assets/doorflow-wordmark.svg" alt="DoorFlow"></a>
+    <a class="docs" href="https://developer.doorflow.com/">Developers</a>
+  </div>
+</header>
 <main>
-  <h1>DoorFlow Downloads</h1>
-    <section class="card">
-      <h2>DoorFlow Desktop</h2>
-      <div class="dls">
-        <div class="row">
-          <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.2-b8-mac/DoorFlowDesktop-Setup.dmg">Download for macOS<span class="ver">v1.9.2 (8)</span></a><span class="meta">macOS · 17.1 MB</span>
-          <div class="sum"><span>SHA-256</span><code>5ab479112f0bb06e7a564a23fe179987a7a4a4e94bfc6fe63291b743c82e4734</code></div>
+  <h1>Downloads</h1>
+  <p class="lede">The latest DoorFlow apps. Every download is code-signed.</p>
+      <section class="card">
+        <h2>DoorFlow Desktop</h2>
+        <div class="dls">
+          <div class="row">
+            <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.2-b8-mac/DoorFlowDesktop-Setup.dmg">Download for macOS<span class="ver">v1.9.2 (8)</span></a><span class="meta">macOS · 17.1 MB</span>
+            <div class="sum"><span>SHA-256</span><code>5ab479112f0bb06e7a564a23fe179987a7a4a4e94bfc6fe63291b743c82e4734</code></div>
+          </div>
+          <div class="row">
+            <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3-b10/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">v1.9.3 (10)</span></a><span class="meta">Windows · 94.9 MB</span>
+            <div class="sum"><span>SHA-256</span><code>efc346790501eb5351be7422d2c1c8b0a2d5f0e85940d319396f7eccdd8fad0b</code></div>
+          </div>
         </div>
-        <div class="row">
-          <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3-b10/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">v1.9.3 (10)</span></a><span class="meta">Windows · 94.9 MB</span>
-          <div class="sum"><span>SHA-256</span><code>efc346790501eb5351be7422d2c1c8b0a2d5f0e85940d319396f7eccdd8fad0b</code></div>
-        </div>
-      </div>
-    </section>
-  <footer>DoorFlow · all downloads are code-signed</footer>
+      </section>
 </main>
+<footer>
+  <div class="inner">
+    <img src="assets/doorflow-mark.svg" alt="DoorFlow">
+    <div class="addr">
+      7 Bell Yard, London, WC2A 2JR, United Kingdom<br>
+      &copy; DoorFlow 2026 &middot; Registered Company No. 06520034
+    </div>
+  </div>
+</footer>
 </body>
 </html>
