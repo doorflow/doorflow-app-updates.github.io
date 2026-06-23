@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "apps": [
+    {
+      "slug": "doorflow-desktop",
+      "name": "DoorFlow Desktop",
+      "downloads": [
+        {
+          "platform": "windows",
+          "label": "Windows",
+          "version": "1.9.3 (10)",
+          "url": "https://updates.doorflow.com/download/doorflow-desktop/windows",
+          "published": "2026-06-23T11:25:24Z"
+        }
+      ]
+    }
+  ]
+}
