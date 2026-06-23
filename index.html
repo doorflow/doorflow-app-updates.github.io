@@ -5,24 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DoorFlow Downloads</title>
 <style>
-  :root { color-scheme: light dark; }
-  body { font: 16px/1.5 -apple-system, Segoe UI, Roboto, sans-serif;
-         margin: 0; padding: 2.5rem 1rem; background: #f6f7f9; color: #1b1f23; }
-  main { max-width: 760px; margin: 0 auto; }
-  h1 { font-size: 1.8rem; margin: 0 0 1.5rem; }
-  .card { background: #fff; border: 1px solid #e1e4e8; border-radius: 12px;
-          padding: 1.25rem 1.5rem; margin: 0 0 1.25rem; }
-  .card h2 { margin: 0 0 .9rem; font-size: 1.25rem; }
-  .dls { display: flex; flex-wrap: wrap; gap: .75rem; }
-  a.dl { display: inline-flex; flex-direction: column; text-decoration: none;
-         background: #0969da; color: #fff; padding: .6rem 1.1rem;
-         border-radius: 8px; font-weight: 600; }
-  a.dl:hover { background: #0860c8; }
-  a.dl .ver { font-weight: 400; font-size: .8rem; opacity: .85; }
-  @media (prefers-color-scheme: dark) {
-    body { background: #0d1117; color: #e6edf3; }
-    .card { background: #161b22; border-color: #30363d; }
-  }
+  body { font-family: "Averta", "Lato", system-ui, -apple-system,
+         "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.55;
+         margin: 0; padding: 3rem 1rem; background: #f6f7f9; color: #111827; }
+  main { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; color: #0E2653; margin: 0 0 1.75rem; }
+  .card { background: #fff; border: 1px solid #E5E7EB; border-radius: .75rem;
+          padding: 1.5rem 1.75rem; margin: 0 0 1.5rem;
+          box-shadow: 0 1px 2px rgba(14,38,83,.04); }
+  .card h2 { margin: 0 0 .75rem; font-size: 1.3rem; color: #0E2653; }
+  .notes { color: #374151; font-size: .95rem; margin: 0 0 1.25rem; }
+  .notes ul { padding-left: 1.2rem; margin: .4rem 0; }
+  .notes p { margin: .4rem 0; }
+  .dls { display: flex; flex-direction: column; gap: 1rem; }
+  .row { display: flex; flex-direction: column; gap: .4rem; }
+  a.dl { align-self: flex-start; display: inline-flex; align-items: baseline;
+         gap: .5rem; text-decoration: none; background: #3765E3; color: #fff;
+         padding: .65rem 1.15rem; border-radius: .5rem; font-weight: 600;
+         transition: background .2s; }
+  a.dl:hover { background: #0E2653; }
+  a.dl .ver { font-weight: 400; font-size: .82rem; opacity: .85; }
+  .meta { color: #6B7280; font-size: .82rem; }
+  .sum { font-size: .72rem; color: #6B7280; display: flex; gap: .4rem;
+         align-items: baseline; flex-wrap: wrap; }
+  .sum span { font-weight: 600; letter-spacing: .03em; }
+  .sum code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+         color: #374151; word-break: break-all; }
+  footer { color: #9CA3AF; font-size: .8rem; text-align: center;
+           margin-top: 2.5rem; }
 </style>
 </head>
 <body>
@@ -31,10 +41,16 @@
     <section class="card">
       <h2>DoorFlow Desktop</h2>
       <div class="dls">
-        <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.2-b8-mac/DoorFlowDesktop-Setup.dmg">Download for macOS<span class="ver">1.9.2 (8)</span></a>
-        <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3-b10/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">1.9.3 (10)</span></a>
+        <div class="row">
+          <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.2-b8-mac/DoorFlowDesktop-Setup.dmg">Download for macOS<span class="ver">v1.9.2 (8)</span></a><span class="meta">macOS</span>
+        </div>
+        <div class="row">
+          <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3-b10/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">v1.9.3 (10)</span></a><span class="meta">Windows · 94.9 MB</span>
+          <div class="sum"><span>SHA-256</span><code>efc346790501eb5351be7422d2c1c8b0a2d5f0e85940d319396f7eccdd8fad0b</code></div>
+        </div>
       </div>
     </section>
+  <footer>DoorFlow · all downloads are code-signed</footer>
 </main>
 </body>
 </html>
