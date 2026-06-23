@@ -23,37 +23,54 @@
   header .docs { color: var(--navy); text-decoration: none; font-weight: 600;
          font-size: .92rem; opacity: .7; }
   header .docs:hover { opacity: 1; }
-  main { max-width: 680px; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; }
   h1 { font-size: 1.6rem; font-weight: 600; margin: 0 0 .4rem;
         letter-spacing: -.01em; }
   .lede { color: var(--grey); margin: 0 0 2.5rem; font-size: 1.05rem; }
-  .card { border: 1px solid #EAECEF; border-radius: .75rem;
-         padding: 1.6rem 1.75rem; margin: 0 0 1.25rem; }
+  /* Card: app info on the left, download buttons on the right. */
+  .card { display: flex; gap: 2.5rem; align-items: flex-start;
+         justify-content: space-between; border: 1px solid #EAECEF;
+         border-radius: .75rem; padding: 1.6rem 1.75rem; margin: 0 0 1.25rem; }
+  .card .info { flex: 1; min-width: 0; }
   .card h2 { margin: 0 0 .8rem; font-size: 1.25rem; font-weight: 600; }
-  .notes { color: #4B5563; font-size: .95rem; margin: 0 0 1.5rem; }
+  .notes { color: #4B5563; font-size: .95rem; margin: 0; }
   .notes ul { padding-left: 1.15rem; margin: .35rem 0; }
   .notes li { margin: .15rem 0; }
   .notes p { margin: .35rem 0; }
-  .dls { display: flex; flex-direction: column; gap: 1.25rem; }
-  .row { display: flex; flex-direction: column; gap: .5rem; }
-  a.dl { align-self: flex-start; display: inline-flex; align-items: center;
-         gap: .5rem; text-decoration: none; background: var(--blue);
-         color: #fff; padding: .85rem 1.25rem; border-radius: .5rem;
-         font-weight: 600; line-height: 1; transition: background .2s; }
+  .dls { display: flex; flex-direction: column; gap: 1.1rem;
+         align-items: flex-end; flex-shrink: 0; }
+  .row { display: flex; flex-direction: column; gap: .45rem;
+         align-items: flex-end; max-width: 260px; }
+  a.dl { display: inline-flex; align-items: center; gap: .5rem;
+         text-decoration: none; background: var(--blue); color: #fff;
+         padding: .85rem 1.25rem; border-radius: .5rem; font-weight: 600;
+         line-height: 1; white-space: nowrap; transition: background .2s; }
   a.dl:hover { background: #2b54c4; }
   a.dl .ver { font-weight: 400; font-size: .8rem; opacity: .82; }
   .meta { color: var(--grey); font-size: .82rem; }
-  .sum { font-size: .72rem; color: #9098A3; display: flex; gap: .45rem;
-         align-items: baseline; flex-wrap: wrap; }
+  .sum { font-size: .68rem; color: #9098A3; text-align: right; }
   .sum span { font-weight: 600; letter-spacing: .04em; }
   .sum code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
          color: var(--grey); word-break: break-all; }
-  footer { background: var(--footer); color: #fff; padding: 2.5rem 2rem; }
+  @media (max-width: 620px) {
+    .card { flex-direction: column; gap: 1.4rem; }
+    .dls, .row { align-items: flex-start; }
+    .row { max-width: none; }
+    .sum { text-align: left; }
+  }
+  /* Footer matched to doorflow.com / developer.doorflow.com. */
+  footer { background: var(--footer); color: #fff; padding: 3rem 2rem; }
   footer .inner { max-width: 960px; margin: 0 auto; display: flex;
-         flex-wrap: wrap; gap: 1.25rem 2rem; align-items: center;
-         justify-content: space-between; }
-  footer img { height: 44px; }
-  footer .addr { font-size: .82rem; opacity: .7; line-height: 1.55; }
+         flex-wrap: wrap; gap: 2.5rem 3rem; justify-content: space-between; }
+  footer .brand img { height: 44px; margin-bottom: 1rem; }
+  footer .addr { font-size: .82rem; opacity: .7; line-height: 1.6; }
+  footer .cols { display: flex; flex-wrap: wrap; gap: 2.5rem 3rem; }
+  footer .col { display: flex; flex-direction: column; gap: .55rem; }
+  footer .col h4 { margin: 0 0 .3rem; font-size: .75rem; font-weight: 600;
+         letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+  footer .col a { color: #fff; text-decoration: none; font-size: .88rem;
+         opacity: .72; }
+  footer .col a:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -65,14 +82,15 @@
 </header>
 <main>
   <h1>Downloads</h1>
-  <p class="lede">The latest DoorFlow apps — every download is code-signed.</p>
+  <p class="lede">The latest DoorFlow apps — every download is signed and verified.</p>
       <section class="card">
-        <h2>DoorFlow Desktop</h2>
+        <div class="info">
+          <h2>DoorFlow Desktop</h2>
         <div class="notes"><ul>
-<li>Signed with a Developer ID certificate and notarised by Apple, so macOS installs cleanly with no Gatekeeper warnings.</li>
-<li>Universal build that runs natively on both Apple Silicon and Intel Macs.</li>
-<li>Hardened runtime with a stapled notarisation ticket, so it verifies even when offline.</li>
+<li>The Windows installer is now code-signed with a trusted certificate, so it installs without the &quot;unrecognised app&quot; warning.</li>
+<li>A published SHA-256 checksum lets you verify the download is genuine and untampered.</li>
 </ul></div>
+        </div>
         <div class="dls">
           <div class="row">
             <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.2/DoorFlowDesktop-Setup.dmg">Download for macOS<span class="ver">v1.9.2 (8)</span></a><span class="meta">macOS · 17.1 MB</span>
@@ -87,11 +105,33 @@
 </main>
 <footer>
   <div class="inner">
-    <img src="assets/doorflow-mark.svg" alt="DoorFlow">
-    <div class="addr">
-      7 Bell Yard, London, WC2A 2JR, United Kingdom<br>
-      &copy; DoorFlow 2026 &middot; Registered Company No. 06520034
+    <div class="brand">
+      <a href="https://www.doorflow.com/"><img src="assets/doorflow-mark.svg" alt="DoorFlow"></a>
+      <div class="addr">
+        7 Bell Yard, London, WC2A 2JR, United Kingdom<br>
+        &copy; DoorFlow 2026 &middot; Registered Company No. 06520034
+      </div>
     </div>
+    <nav class="cols">
+      <div class="col">
+        <h4>Product</h4>
+        <a href="https://www.doorflow.com/#features">Features</a>
+        <a href="https://www.doorflow.com/pricing">Pricing</a>
+        <a href="https://www.doorflow.com/hardware">Hardware</a>
+        <a href="https://www.doorflow.com/apps/directory">Apps Directory</a>
+      </div>
+      <div class="col">
+        <h4>Developers</h4>
+        <a href="https://developer.doorflow.com/docs">API Docs</a>
+        <a href="https://developer.doorflow.com/developers/sign_up">Register</a>
+      </div>
+      <div class="col">
+        <h4>Company</h4>
+        <a href="https://policy.doorflow.com/terms_of_service">Terms of Service</a>
+        <a href="https://policy.doorflow.com/privacy_policy">Privacy</a>
+        <a href="https://policy.doorflow.com/cookies">Cookie Policy</a>
+      </div>
+    </nav>
   </div>
 </footer>
 </body>

@@ -24,7 +24,7 @@
           "size": 99461760
         }
       ],
-      "notes_html": "<ul>\n<li>Signed with a Developer ID certificate and notarised by Apple, so macOS installs cleanly with no Gatekeeper warnings.</li>\n<li>Universal build that runs natively on both Apple Silicon and Intel Macs.</li>\n<li>Hardened runtime with a stapled notarisation ticket, so it verifies even when offline.</li>\n</ul>"
+      "notes_html": "<ul>\n<li>The Windows installer is now code-signed with a trusted certificate, so it installs without the &quot;unrecognised app&quot; warning.</li>\n<li>A published SHA-256 checksum lets you verify the download is genuine and untampered.</li>\n</ul>"
     }
   ]
 }
