@@ -18,12 +18,13 @@
           "platform": "windows",
           "label": "Windows",
           "version": "1.9.3 (10)",
-          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3-b10/DoorFlowDesktop-Setup.exe",
+          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3/DoorFlowDesktop-Setup.exe",
           "published": "2026-06-23T11:25:24Z",
           "sha256": "efc346790501eb5351be7422d2c1c8b0a2d5f0e85940d319396f7eccdd8fad0b",
           "size": 99461760
         }
-      ]
+      ],
+      "notes_html": "<ul>\n<li>The Windows installer is now code-signed with a trusted certificate, so it installs without the &quot;unrecognised app&quot; warning.</li>\n<li>A published SHA-256 checksum lets you verify the download is genuine and untampered.</li>\n</ul>"
     }
   ]
 }
