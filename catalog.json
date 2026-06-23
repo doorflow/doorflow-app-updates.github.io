@@ -16,7 +16,7 @@
           "platform": "windows",
           "label": "Windows",
           "version": "1.9.3 (10)",
-          "url": "https://updates.doorflow.com/download/doorflow-desktop/windows",
+          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.3-b10/DoorFlowDesktop-Setup.exe",
           "published": "2026-06-23T11:25:24Z"
         }
       ]
