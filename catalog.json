@@ -6,6 +6,13 @@
       "name": "DoorFlow Desktop",
       "downloads": [
         {
+          "platform": "macos",
+          "label": "macOS",
+          "version": "1.9.2 (8)",
+          "url": "https://updates.doorflow.com/download/doorflow-desktop/macos",
+          "published": "2026-06-16T17:21:39Z"
+        },
+        {
           "platform": "windows",
           "label": "Windows",
           "version": "1.9.3 (10)",
