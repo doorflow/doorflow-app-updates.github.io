@@ -17,11 +17,11 @@
         {
           "platform": "windows",
           "label": "Windows",
-          "version": "1.9.6 (16)",
-          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.6/DoorFlowDesktop-Setup.exe",
-          "published": "2026-07-02T13:49:03Z",
-          "sha256": "2acc255ddd24dbe55b8c76f302cae195a83ed2fdcffee90695bc3960717c80fa",
-          "size": 99473392
+          "version": "1.9.7 (17)",
+          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.7/DoorFlowDesktop-Setup.exe",
+          "published": "2026-07-02T15:27:46Z",
+          "sha256": "ed71e60e1898ee51e6a5c546a6ed5c9cbc7705b66854b22108036cdcfe81e809",
+          "size": 99460616
         }
       ],
       "notes_html": "<ul>\n<li>Signed with a Developer ID certificate and notarised by Apple, so macOS installs cleanly with no Gatekeeper warnings.</li>\n<li>Universal build that runs natively on both Apple Silicon and Intel Macs.</li>\n<li>Hardened runtime with a stapled notarisation ticket, so it verifies even when offline.</li>\n</ul>"
