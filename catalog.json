@@ -8,11 +8,11 @@
         {
           "platform": "macos",
           "label": "macOS",
-          "version": "1.9.2 (8)",
-          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.2/DoorFlowDesktop-Setup.dmg",
-          "published": "2026-06-16T17:21:39Z",
-          "sha256": "5ab479112f0bb06e7a564a23fe179987a7a4a4e94bfc6fe63291b743c82e4734",
-          "size": 17894261
+          "version": "1.9.5 (15)",
+          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.5/DoorFlowDesktop-Setup.dmg",
+          "published": "2026-07-02T13:40:01Z",
+          "sha256": "5a4173268e9427d82d36bc7c15070285381278e55229177279f5278351c76a16",
+          "size": 17905916
         },
         {
           "platform": "windows",
