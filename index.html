@@ -86,10 +86,35 @@
       <section class="card">
         <div class="info">
           <h2>DoorFlow Desktop</h2>
-        <div class="notes"><ul>
-<li>Signed with a Developer ID certificate and notarised by Apple, so macOS installs cleanly with no Gatekeeper warnings.</li>
-<li>Universal build that runs natively on both Apple Silicon and Intel Macs.</li>
-<li>Hardened runtime with a stapled notarisation ticket, so it verifies even when offline.</li>
+        <div class="notes"><p># DoorFlow Desktop 1.9.8 (18)</p>
+<p>### Added</p>
+<ul>
+<li>Window size and position are remembered and restored on launch (only if they still fit a connected display).</li>
+<li>Empty-state screen shown when a people list has no rows.</li>
+</ul>
+<p>### Changed</p>
+<ul>
+<li>**New Workspace** now mirrors the source window: its size, current view, selected person and selected template — cascaded 20px down and to the right.</li>
+<li>The people list defaults to **All People** on load.</li>
+<li>The new-starter context sub-label now appears in every list, not just the New Starters smart group.</li>
+<li>Soft-deleted people (those with `deleted_at` set) are hidden from all active lists and skipped by the photo cache.</li>
+<li>A deleted person&#x27;s queued cards are removed from the print queue (printed-card history is kept).</li>
+<li>Blank card sides are no longer printed — a double-sided template with an empty back now prints a single side.</li>
+</ul>
+<p>### Fixed</p>
+<ul>
+<li>App hung on quit when a photo or linked-file sync was running; background sync now stops cleanly.</li>
+<li>First-run crash caused by a database transaction held open across photo downloads.</li>
+<li>Garbled terms-of-service and licence text on Windows (UTF-8 encoding).</li>
+<li>Clearing or setting a card-template background not sticking on a newly created template.</li>
+<li>Editor palette jumping to Settings when re-selecting the already-selected template.</li>
+<li>Selected-row name in the people list rendered near-invisible when the list was not focused.</li>
+<li>Add-to-Queue / Print Selected / Clear Selected now disabled when no person is selected.</li>
+<li>Card fields such as job title, department and custom fields were missing on printed cards even though they appeared in the preview; the printed card now uses the fully-populated person record.</li>
+<li>The print queue now returns to the &quot;queue is empty&quot; screen when the last card finishes printing.</li>
+<li>The name and details on a card that is currently printing were hard to read (light text on the amber row); they now use a readable colour.</li>
+<li>The template editor&#x27;s Front/Back toggle could show &quot;Back&quot; while the front was displayed after a background sync; the canvas and toggle now stay in step.</li>
+<li>The background-image well in the template editor kept showing the previous template&#x27;s image after switching templates; it now tracks the selected template&#x27;s current side.</li>
 </ul></div>
         </div>
         <div class="dls">
@@ -98,8 +123,8 @@
             <div class="sum"><span>SHA-256</span><code>9a4bd554197b04b573881acec2c1447dcd7bc2cf251c1552a42e992b08193f02</code></div>
           </div>
           <div class="row">
-            <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.7/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">v1.9.7 (17)</span></a><span class="meta">Windows · 94.9 MB</span>
-            <div class="sum"><span>SHA-256</span><code>ed71e60e1898ee51e6a5c546a6ed5c9cbc7705b66854b22108036cdcfe81e809</code></div>
+            <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.8/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">v1.9.8 (19)</span></a><span class="meta">Windows · 94.9 MB</span>
+            <div class="sum"><span>SHA-256</span><code>45cfcf2fa49182b7ba8c958ec646a5804e99a446b39c7792d585391355d19301</code></div>
           </div>
         </div>
       </section>
