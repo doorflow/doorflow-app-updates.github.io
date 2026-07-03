@@ -12,31 +12,36 @@
   :root { --navy:#0E2653; --blue:#3765E3; --footer:#1B345F; --grey:#6B7280; }
   * { box-sizing: border-box; }
   body { font-family: "Averta", system-ui, -apple-system, "Segoe UI",
-         Roboto, sans-serif; font-size: 16px; line-height: 1.6; margin: 0;
+         Roboto, sans-serif; font-size: 17px; line-height: 1.65; margin: 0;
          color: var(--navy); background: #fff;
          -webkit-font-smoothing: antialiased; }
   a { color: var(--blue); }
   header { padding: 1.25rem 2rem; border-bottom: 1px solid #EEF1F5; }
-  header .bar { max-width: 960px; margin: 0 auto; display: flex;
+  header .bar { max-width: 1000px; margin: 0 auto; display: flex;
          align-items: center; justify-content: space-between; }
   header img { height: 26px; display: block; }
   header .docs { color: var(--navy); text-decoration: none; font-weight: 600;
          font-size: .92rem; opacity: .7; }
   header .docs:hover { opacity: 1; }
-  main { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; }
-  h1 { font-size: 1.6rem; font-weight: 600; margin: 0 0 .4rem;
-        letter-spacing: -.01em; }
-  .lede { color: var(--grey); margin: 0 0 2.5rem; font-size: 1.05rem; }
+  main { max-width: 1000px; margin: 0 auto; padding: 4.5rem 2rem 5rem; }
+  h1 { font-size: 2rem; font-weight: 600; margin: 0 0 .5rem;
+        letter-spacing: -.015em; }
+  .lede { color: var(--grey); margin: 0 0 3rem; font-size: 1.15rem; }
   /* Card: app info on the left, download buttons on the right. */
-  .card { display: flex; gap: 2.5rem; align-items: flex-start;
+  .card { display: flex; gap: 3.5rem; align-items: flex-start;
          justify-content: space-between; border: 1px solid #EAECEF;
-         border-radius: .75rem; padding: 1.6rem 1.75rem; margin: 0 0 1.25rem; }
+         border-radius: .75rem; padding: 2.25rem 2.5rem; margin: 0 0 1.5rem; }
   .card .info { flex: 1; min-width: 0; }
   .card h2 { margin: 0 0 .8rem; font-size: 1.25rem; font-weight: 600; }
   .notes { color: #4B5563; font-size: .95rem; margin: 0; }
   .notes ul { padding-left: 1.15rem; margin: .35rem 0; }
   .notes li { margin: .15rem 0; }
   .notes p { margin: .35rem 0; }
+  .card .tagline { color: var(--grey); font-size: .98rem;
+         margin: -.3rem 0 .9rem; }
+  .card .latest { color: var(--grey); font-size: .82rem; margin: 1.1rem 0 0; }
+  .card .latest a { color: var(--blue); text-decoration: none; }
+  .card .latest a:hover { text-decoration: underline; }
   .dls { display: flex; flex-direction: column; gap: 1.1rem;
          align-items: flex-end; flex-shrink: 0; }
   .row { display: flex; flex-direction: column; gap: .45rem;
@@ -60,7 +65,7 @@
   }
   /* Footer matched to doorflow.com / developer.doorflow.com. */
   footer { background: var(--footer); color: #fff; padding: 3rem 2rem; }
-  footer .inner { max-width: 960px; margin: 0 auto; display: flex;
+  footer .inner { max-width: 1000px; margin: 0 auto; display: flex;
          flex-wrap: wrap; gap: 2.5rem 3rem; justify-content: space-between; }
   footer .brand img { height: 44px; margin-bottom: 1rem; }
   footer .addr { font-size: .82rem; opacity: .7; line-height: 1.6; }
@@ -86,36 +91,15 @@
       <section class="card">
         <div class="info">
           <h2>DoorFlow Desktop</h2>
-        <div class="notes"><p># DoorFlow Desktop 1.9.8 (18)</p>
-<p>### Added</p>
+          <p class="tagline">Design, print and encode cards (i.e. ID and access control)</p>
+          <div class="notes"><p>Everything you need to design, encode and print access and ID cards. Create professional cards in minutes from a range of templates, add your own logos and cardholder photos, then encode and print them whenever you need to.</p>
+<p>DoorFlow Desktop works with the tools you already have. Sync cardholders automatically from Microsoft Active Directory, Google Workspace, Azure or LDAP — no more manual data entry — print straight to your existing card printer without the usual driver headaches, and encode contactless passes, barcodes and biometric data for secure identification and access. Design for free, and upgrade to unlock database integration, encoding and printing when you’re ready.</p>
 <ul>
-<li>Window size and position are remembered and restored on launch (only if they still fit a connected display).</li>
-<li>Empty-state screen shown when a people list has no rows.</li>
-</ul>
-<p>### Changed</p>
-<ul>
-<li>**New Workspace** now mirrors the source window: its size, current view, selected person and selected template — cascaded 20px down and to the right.</li>
-<li>The people list defaults to **All People** on load.</li>
-<li>The new-starter context sub-label now appears in every list, not just the New Starters smart group.</li>
-<li>Soft-deleted people (those with `deleted_at` set) are hidden from all active lists and skipped by the photo cache.</li>
-<li>A deleted person&#x27;s queued cards are removed from the print queue (printed-card history is kept).</li>
-<li>Blank card sides are no longer printed — a double-sided template with an empty back now prints a single side.</li>
-</ul>
-<p>### Fixed</p>
-<ul>
-<li>App hung on quit when a photo or linked-file sync was running; background sync now stops cleanly.</li>
-<li>First-run crash caused by a database transaction held open across photo downloads.</li>
-<li>Garbled terms-of-service and licence text on Windows (UTF-8 encoding).</li>
-<li>Clearing or setting a card-template background not sticking on a newly created template.</li>
-<li>Editor palette jumping to Settings when re-selecting the already-selected template.</li>
-<li>Selected-row name in the people list rendered near-invisible when the list was not focused.</li>
-<li>Add-to-Queue / Print Selected / Clear Selected now disabled when no person is selected.</li>
-<li>Card fields such as job title, department and custom fields were missing on printed cards even though they appeared in the preview; the printed card now uses the fully-populated person record.</li>
-<li>The print queue now returns to the &quot;queue is empty&quot; screen when the last card finishes printing.</li>
-<li>The name and details on a card that is currently printing were hard to read (light text on the amber row); they now use a readable colour.</li>
-<li>The template editor&#x27;s Front/Back toggle could show &quot;Back&quot; while the front was displayed after a background sync; the canvas and toggle now stay in step.</li>
-<li>The background-image well in the template editor kept showing the previous template&#x27;s image after switching templates; it now tracks the selected template&#x27;s current side.</li>
+<li><strong>No manual entry</strong> — sync cardholders straight from Active Directory, LDAP and other platforms.</li>
+<li><strong>Print to your own hardware</strong> — compatible with most card printers, including Evolis, Magicard and Zebra.</li>
+<li><strong>Smart encoding</strong> — contactless identification, 1D/2D barcodes and biometric data, handled while you design.</li>
 </ul></div>
+          <p class="latest">Latest version: 1.9.8 (19) · <a href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/tag/doorflow-desktop-v1.9.8">Release notes</a></p>
         </div>
         <div class="dls">
           <div class="row">
