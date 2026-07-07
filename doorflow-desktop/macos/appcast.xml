@@ -1,8 +1,8 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
   <channel>
     <title>DoorFlow Desktop updates (mac)</title>
-    <link>https://updates.doorflow.com/appcast.xml</link>
+    <link>https://updates.doorflow.com/doorflow-desktop/macos/appcast.xml</link>
     <item>
       <title>Version 1.9.11 (26)</title>
       <pubDate>Tue, 07 Jul 2026 15:50:21 +0000</pubDate>
