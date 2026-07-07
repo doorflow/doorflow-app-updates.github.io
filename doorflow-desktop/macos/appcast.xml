@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+  <channel>
+    <title>DoorFlow Desktop updates (mac)</title>
+    <link>https://updates.doorflow.com/appcast.xml</link>
+    <item>
+      <title>Version 1.9.11 (26)</title>
+      <pubDate>Tue, 07 Jul 2026 15:50:21 +0000</pubDate>
+      <enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.11/DoorFlow%20Desktop.dmg" sparkle:version="26" sparkle:shortVersionString="1.9.11" length="18248045" type="application/octet-stream" sparkle:edSignature="49GpelKhdgUSSLTJiUWnBzOIaT6uytm/x6cS8IIxINprAYPWvEJG3VagZojE8AaMcgRBlau/ykNrnM5ruW2mBw=="/>
+    </item>
+  </channel>
+</rss>
