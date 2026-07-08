@@ -3,7 +3,20 @@
   <channel>
     <title>Release Tool updates (win)</title>
     <link>https://updates.doorflow.com/doorflow-desktop/windows/appcast.xml</link>
-    <item><title>Version 1.9.11 (26)</title><pubDate>Tue, 07 Jul 2026 16:29:13 +0000</pubDate><enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.11/DoorFlow%20Desktop-1.9.11%20%2826%29-Setup.exe" sparkle:version="26" sparkle:shortVersionString="1.9.11" length="99536144" type="application/octet-stream" sparkle:edSignature="YvShqoagKyAyTtFuhrxIDSxNnruyboZEV0ql/jZcNle+YlCBJf8uKF2UdXn6DJc+OLwtIp2EK8pv6R62Z7BDBw==" sparkle:os="windows"/></item><item>
+    <item><title>Version 1.9.12 (28)</title><pubDate>Wed, 08 Jul 2026 18:21:29 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.9.12 (27)&lt;/p&gt;
+&lt;p&gt;### Added&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card **live** as you drag - replacing the modal system picker that only applied the colour after you closed it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;### Fixed&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Template editor: an object snapped to a centre guide (the card centre or another object&amp;#x27;s centre) now sits exactly under the guide line - the line is drawn through the object&amp;#x27;s rendered centre, removing the ~1px gap that pixel-rounding otherwise left.&lt;/li&gt;
+&lt;li&gt;Template editor: alignment guides no longer flicker between two positions when you hold an object near a snap point - the snap now sticks to its chosen target instead of flipping between near-tied candidates.&lt;/li&gt;
+&lt;li&gt;Completing first-run setup now reliably sticks on macOS.&lt;/li&gt;
+&lt;li&gt;First-run setup is now marked complete as soon as you sign in (rather than only on the final &amp;quot;Open DoorFlow Desktop&amp;quot; button), so quitting during or right after the initial sync no longer restarts the whole first-run wizard on the next launch.&lt;/li&gt;
+&lt;li&gt;Deleting the template you&amp;#x27;re editing now moves the editor to the next remaining template (instead of leaving the deleted design on the canvas); if no templates remain, it drops to the All People view.&lt;/li&gt;
+&lt;li&gt;Creating a new card template no longer opens to a blank card - a new template is given a valid default orientation, so it renders immediately instead of only after toggling the front/back orientation.&lt;/li&gt;
+&lt;/ul&gt;</description><enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.12/DoorFlow%20Desktop-1.9.12%20%2828%29-Setup.exe" sparkle:version="28" sparkle:shortVersionString="1.9.12" length="99537648" type="application/octet-stream" sparkle:edSignature="zdF+nUPFvatvqMqo5fQgfnGxFVNozt3zBQMfdpsE/ZeS15A+LeeiGKa8g+n3fFTQx+IOYuajaMLaQllzvoUuCQ==" sparkle:os="windows"/></item><item><title>Version 1.9.11 (26)</title><pubDate>Tue, 07 Jul 2026 16:29:13 +0000</pubDate><enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.11/DoorFlow%20Desktop-1.9.11%20%2826%29-Setup.exe" sparkle:version="26" sparkle:shortVersionString="1.9.11" length="99536144" type="application/octet-stream" sparkle:edSignature="YvShqoagKyAyTtFuhrxIDSxNnruyboZEV0ql/jZcNle+YlCBJf8uKF2UdXn6DJc+OLwtIp2EK8pv6R62Z7BDBw==" sparkle:os="windows"/></item><item>
       <title>Version 1.9.1 (3)</title>
       <pubDate>Mon, 15 Jun 2026 23:05:45 +0000</pubDate>
       <enclosure url="https://github.com/doorflow/release-tool/releases/download/doorflow-desktop-v1.9.1-b3/DoorFlow%20Desktop-1.9.1%20%283%29-Setup.exe" sparkle:version="3" sparkle:shortVersionString="1.9.1" length="99310109" type="application/octet-stream" sparkle:edSignature="oun47jbt0Xbe44+pHG6IJofovpEuuIrQCw5JNIAZdddhM9Cw3kuq0kDsD1IjkcO8MtK42rLIZH/JuYdaMheLDA==" sparkle:os="windows"/>

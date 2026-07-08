@@ -3,7 +3,20 @@
   <channel>
     <title>DoorFlow Desktop updates (mac)</title>
     <link>https://updates.doorflow.com/doorflow-desktop/macos/appcast.xml</link>
-    <item>
+    <item><title>Version 1.9.12 (28)</title><pubDate>Wed, 08 Jul 2026 18:23:15 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.9.12 (27)&lt;/p&gt;
+&lt;p&gt;### Added&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card **live** as you drag - replacing the modal system picker that only applied the colour after you closed it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;### Fixed&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Template editor: an object snapped to a centre guide (the card centre or another object&amp;#x27;s centre) now sits exactly under the guide line - the line is drawn through the object&amp;#x27;s rendered centre, removing the ~1px gap that pixel-rounding otherwise left.&lt;/li&gt;
+&lt;li&gt;Template editor: alignment guides no longer flicker between two positions when you hold an object near a snap point - the snap now sticks to its chosen target instead of flipping between near-tied candidates.&lt;/li&gt;
+&lt;li&gt;Completing first-run setup now reliably sticks on macOS.&lt;/li&gt;
+&lt;li&gt;First-run setup is now marked complete as soon as you sign in (rather than only on the final &amp;quot;Open DoorFlow Desktop&amp;quot; button), so quitting during or right after the initial sync no longer restarts the whole first-run wizard on the next launch.&lt;/li&gt;
+&lt;li&gt;Deleting the template you&amp;#x27;re editing now moves the editor to the next remaining template (instead of leaving the deleted design on the canvas); if no templates remain, it drops to the All People view.&lt;/li&gt;
+&lt;li&gt;Creating a new card template no longer opens to a blank card - a new template is given a valid default orientation, so it renders immediately instead of only after toggling the front/back orientation.&lt;/li&gt;
+&lt;/ul&gt;</description><enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.12/DoorFlow%20Desktop.dmg" sparkle:version="28" sparkle:shortVersionString="1.9.12" length="18253616" type="application/octet-stream" sparkle:edSignature="2ZLCcxIUA3eVFZRlELgEIGFDXFdBSeTP5JOTF2VQnou/ZVz13UhjHyIo3R7Rz0heEoeZO3+rcFDYmeQ8tXf/Cg=="/></item><item>
       <title>Version 1.9.11 (26)</title>
       <pubDate>Tue, 07 Jul 2026 15:50:21 +0000</pubDate>
       <enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.11/DoorFlow%20Desktop.dmg" sparkle:version="26" sparkle:shortVersionString="1.9.11" length="18248045" type="application/octet-stream" sparkle:edSignature="49GpelKhdgUSSLTJiUWnBzOIaT6uytm/x6cS8IIxINprAYPWvEJG3VagZojE8AaMcgRBlau/ykNrnM5ruW2mBw=="/>
