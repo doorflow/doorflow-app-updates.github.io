@@ -3,7 +3,26 @@
   <channel>
     <title>DoorFlow Desktop updates (mac)</title>
     <link>https://updates.doorflow.com/doorflow-desktop/macos/appcast.xml</link>
-    <item><title>Version 1.9.12 (28)</title><pubDate>Wed, 08 Jul 2026 18:23:15 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.9.12 (27)&lt;/p&gt;
+    <item><title>Version 1.9.14 (31)</title><pubDate>Thu, 23 Jul 2026 23:11:25 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.9.14 (31)&lt;/p&gt;
+&lt;p&gt;### Fixed&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Searching a people/cards list that matches no-one no longer strands you: previously an empty result switched to the empty-state panel, which hid the search field so you couldn&amp;#x27;t edit or clear your search. A search that returns nothing now keeps the list panel (and the search field) visible, and the card preview shows a friendly &amp;quot;no-one selected&amp;quot; empty state (the same copy as the full empty page) instead of the previously-selected person&amp;#x27;s card, with the Template chooser hidden. The full empty-state panel only shows when the view is genuinely empty (no active search).&lt;/li&gt;
+&lt;li&gt;Person photo on the card preview no longer shifts/crops incorrectly (appearing pushed to the left, and moving as you resize the window). The photo&amp;#x27;s crop was being computed from the on-screen frame size instead of the photo&amp;#x27;s own pixels, so it drifted with the canvas scale and varied by photo; it&amp;#x27;s now a stable centred cover-fit. This also makes the printed-card photo framing consistent.&lt;/li&gt;
+&lt;li&gt;Incremental (2-minute) sync is now anchored to the DoorFlow server&amp;#x27;s clock from the moment the app launches, closing a window where a device whose clock ran fast could ask the server for changes &amp;quot;since&amp;quot; a time in the future and silently skip recently-updated people. The server-time offset is now measured from the reachability probe (so it&amp;#x27;s known on launch and refreshed every minute) and remembered between launches, instead of resetting until the first data sync of the session.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;### Added&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card **live** as you drag — replacing the modal system picker that only applied the colour after you closed it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;### Fixed&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Template editor: an object snapped to a centre guide (the card centre or another object&amp;#x27;s centre) now sits exactly under the guide line — the line is drawn through the object&amp;#x27;s rendered centre, removing the ~1px gap that pixel-rounding otherwise left.&lt;/li&gt;
+&lt;li&gt;Template editor: alignment guides no longer flicker between two positions when you hold an object near a snap point — the snap now sticks to its chosen target instead of flipping between near-tied candidates.&lt;/li&gt;
+&lt;li&gt;Completing first-run setup now reliably sticks on macOS. CFPreferences batches its disk flush and could drop the completion flag if you quit soon after finishing, restarting the whole wizard; the flag is now also backed by a small marker file that persists immediately, and the marker is retired once the native setting confirms.&lt;/li&gt;
+&lt;li&gt;First-run setup is now marked complete as soon as you sign in (rather than only on the final &amp;quot;Open DoorFlow Desktop&amp;quot; button), so quitting during or right after the initial sync no longer restarts the whole first-run wizard on the next launch.&lt;/li&gt;
+&lt;li&gt;Deleting the template you&amp;#x27;re editing now moves the editor to the next remaining template (instead of leaving the deleted design on the canvas); if no templates remain, it drops to the All People view.&lt;/li&gt;
+&lt;li&gt;Creating a new card template no longer opens to a blank card — a new template is given a valid default orientation, so it renders immediately instead of only after toggling the front/back orientation.&lt;/li&gt;
+&lt;/ul&gt;</description><enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.14/DoorFlow%20Desktop.dmg" sparkle:version="31" sparkle:shortVersionString="1.9.14" length="19566325" type="application/octet-stream" sparkle:edSignature="7pw8/Fun/9eyjvZZ9utQFYitDvUfVGKBualSEDHccJnbsX5cN2m8AoRM8hFkSqJlVB7ejp6b63FobFAYO3+PBw=="/></item><item><title>Version 1.9.12 (28)</title><pubDate>Wed, 08 Jul 2026 18:23:15 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.9.12 (28)&lt;/p&gt;
 &lt;p&gt;### Added&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card **live** as you drag - replacing the modal system picker that only applied the colour after you closed it.&lt;/li&gt;
