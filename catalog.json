@@ -8,20 +8,20 @@
         {
           "platform": "macos",
           "label": "macOS",
-          "version": "1.9.17 (36)",
-          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.17/DoorFlowDesktop-Setup.dmg",
-          "published": "2026-07-24T07:15:39Z",
-          "sha256": "891cb7b6bc8b37092ea91d53ef4e4eaac36d133ec0241330a21fd2c1e98ebf7b",
-          "size": 19672784
+          "version": "1.9.19 (39)",
+          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.19/DoorFlowDesktop-Setup.dmg",
+          "published": "2026-07-24T07:51:41Z",
+          "sha256": "8b69fc1009ce803398cdaceb33ebefc88caa92fd027809bc3b417a6ac14bd14c",
+          "size": 19671930
         },
         {
           "platform": "windows",
           "label": "Windows",
-          "version": "1.9.17 (36)",
-          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.17/DoorFlowDesktop-Setup.exe",
-          "published": "2026-07-24T07:20:15Z",
-          "sha256": "b74951903ea1c793725e4dd7a5d3c1beca30823435c240ead3f8c2aeff0103a5",
-          "size": 100533536
+          "version": "1.9.19 (39)",
+          "url": "https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.19/DoorFlowDesktop-Setup.exe",
+          "published": "2026-07-24T07:56:23Z",
+          "sha256": "6c72e91a8afb93ecf56b10b237489419d12fa403efd5b7df497652d114dad501",
+          "size": 100527096
         }
       ],
       "notes_html": "<p># DoorFlow Desktop 1.9.14 (30)</p>\n<p>### Fixed</p>\n<ul>\n<li>Searching a people/cards list that matches no-one no longer strands you: previously an empty result switched to the empty-state panel, which hid the search field so you couldn&#x27;t edit or clear your search. A search that returns nothing now keeps the list panel (and the search field) visible, and the card preview shows a friendly &quot;no-one selected&quot; empty state (the same copy as the full empty page) instead of the previously-selected person&#x27;s card, with the Template chooser hidden. The full empty-state panel only shows when the view is genuinely empty (no active search).</li>\n<li>Person photo on the card preview no longer shifts/crops incorrectly (appearing pushed to the left, and moving as you resize the window). The photo&#x27;s crop was being computed from the on-screen frame size instead of the photo&#x27;s own pixels, so it drifted with the canvas scale and varied by photo; it&#x27;s now a stable centred cover-fit. This also makes the printed-card photo framing consistent.</li>\n<li>Incremental (2-minute) sync is now anchored to the DoorFlow server&#x27;s clock from the moment the app launches, closing a window where a device whose clock ran fast could ask the server for changes &quot;since&quot; a time in the future and silently skip recently-updated people. The server-time offset is now measured from the reachability probe (so it&#x27;s known on launch and refreshed every minute) and remembered between launches, instead of resetting until the first data sync of the session.</li>\n</ul>\n<p>### Added</p>\n<ul>\n<li>Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card **live** as you drag — replacing the modal system picker that only applied the colour after you closed it.</li>\n</ul>\n<p>### Fixed</p>\n<ul>\n<li>Template editor: an object snapped to a centre guide (the card centre or another object&#x27;s centre) now sits exactly under the guide line — the line is drawn through the object&#x27;s rendered centre, removing the ~1px gap that pixel-rounding otherwise left.</li>\n<li>Template editor: alignment guides no longer flicker between two positions when you hold an object near a snap point — the snap now sticks to its chosen target instead of flipping between near-tied candidates.</li>\n<li>Completing first-run setup now reliably sticks on macOS. CFPreferences batches its disk flush and could drop the completion flag if you quit soon after finishing, restarting the whole wizard; the flag is now also backed by a small marker file that persists immediately, and the marker is retired once the native setting confirms.</li>\n<li>First-run setup is now marked complete as soon as you sign in (rather than only on the final &quot;Open DoorFlow Desktop&quot; button), so quitting during or right after the initial sync no longer restarts the whole first-run wizard on the next launch.</li>\n<li>Deleting the template you&#x27;re editing now moves the editor to the next remaining template (instead of leaving the deleted design on the canvas); if no templates remain, it drops to the All People view.</li>\n<li>Creating a new card template no longer opens to a blank card — a new template is given a valid default orientation, so it renders immediately instead of only after toggling the front/back orientation.</li>\n</ul>"
