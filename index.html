@@ -57,11 +57,15 @@
   .sum span { font-weight: 600; letter-spacing: .04em; }
   .sum code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
          color: var(--grey); word-break: break-all; }
+  .note { font-size: .72rem; line-height: 1.5; color: #9098A3;
+         text-align: right; max-width: 260px; }
+  .note strong { color: var(--grey); font-weight: 600; }
   @media (max-width: 620px) {
     .card { flex-direction: column; gap: 1.4rem; }
     .dls, .row { align-items: flex-start; }
     .row { max-width: none; }
     .sum { text-align: left; }
+    .note { text-align: left; max-width: none; }
   }
   /* Footer matched to doorflow.com / developer.doorflow.com. */
   footer { background: var(--footer); color: #fff; padding: 3rem 2rem; }
@@ -109,6 +113,7 @@
           <div class="row">
             <a class="dl" href="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.9.30/DoorFlowDesktop-Setup.exe">Download for Windows<span class="ver">v1.9.30 (68)</span></a><span class="meta">Windows · 95.9 MB</span>
             <div class="sum"><span>SHA-256</span><code>af3916f720feafd2cf87482dcd3201f8939a9ff7e9f5871147f7567e1671c5af</code></div>
+            <div class="note">First install on Windows may show a SmartScreen prompt that this app “isn’t commonly downloaded” — that’s expected for newer signed apps, not a problem. Choose <strong>More info → Run anyway</strong>. Every download here is code-signed; you can verify the SHA-256 above.</div>
           </div>
         </div>
       </section>
