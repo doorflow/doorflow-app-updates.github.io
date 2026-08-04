@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DoorFlow DoorFlow Desktop release notes</title>
+<style>
+  @font-face { font-family: "Averta"; font-weight: 400; font-style: normal;
+    font-display: swap; src: url(/assets/fonts/Averta-Regular.woff) format("woff"); }
+  @font-face { font-family: "Averta"; font-weight: 600; font-style: normal;
+    font-display: swap; src: url(/assets/fonts/Averta-Semibold.woff) format("woff"); }
+  :root { --navy:#0E2653; --blue:#3765E3; --footer:#1B345F; --grey:#6B7280; }
+  * { box-sizing: border-box; }
+  body { font-family: "Averta", system-ui, -apple-system, "Segoe UI",
+         Roboto, sans-serif; font-size: 17px; line-height: 1.65; margin: 0;
+         color: var(--navy); background: #fff;
+         -webkit-font-smoothing: antialiased; }
+  a { color: var(--blue); }
+  header { padding: 1.25rem 2rem; border-bottom: 1px solid #EEF1F5; }
+  header .bar { max-width: 820px; margin: 0 auto; display: flex;
+         align-items: center; justify-content: space-between; }
+  header img { height: 26px; display: block; }
+  header .docs { color: var(--navy); text-decoration: none; font-weight: 600;
+         font-size: .92rem; opacity: .7; }
+  header .docs:hover { opacity: 1; }
+  main { max-width: 820px; margin: 0 auto; padding: 3.5rem 2rem 5rem; }
+  h1 { font-size: 2rem; font-weight: 600; margin: 0 0 2.5rem;
+        letter-spacing: -.015em; }
+  /* Each version heading, with a rule to separate releases. */
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 2.75rem 0 .25rem;
+        padding-top: 1.75rem; border-top: 1px solid #EAECEF;
+        letter-spacing: -.01em; }
+  main > h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+  h3 { font-size: .78rem; font-weight: 600; letter-spacing: .06em;
+        text-transform: uppercase; color: var(--grey);
+        margin: 1.4rem 0 .4rem; }
+  ul { padding-left: 1.25rem; margin: .3rem 0 1rem; }
+  li { margin: .3rem 0; }
+  p { margin: .5rem 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .88em; background: #F3F5F8; padding: .1em .35em;
+        border-radius: .25rem; }
+  .back { display: inline-block; margin-bottom: 2rem; font-weight: 600;
+        text-decoration: none; font-size: .9rem; }
+  footer { background: var(--footer); color: #fff; padding: 3rem 2rem; }
+  footer .inner { max-width: 820px; margin: 0 auto; display: flex;
+         flex-wrap: wrap; gap: 2.5rem 3rem; justify-content: space-between; }
+  footer .brand img { height: 44px; margin-bottom: 1rem; }
+  footer .addr { font-size: .82rem; opacity: .7; line-height: 1.6; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a href="/"><img src="/assets/doorflow-wordmark.svg" alt="DoorFlow"></a>
+    <a class="docs" href="https://developer.doorflow.com/">Developers</a>
+  </div>
+</header>
+<main>
+  <a class="back" href="/">&larr; Downloads</a>
+  <h1>DoorFlow Desktop release notes</h1>
+<h2>1.11.2</h2>
+<h3>Added</h3>
+<ul>
+<li><strong>Connection Doctor</strong> (<strong>Window</strong> menu) - a live checker that actively probes and shows, with green/red status, whether the app can reach the Internet, the <strong>DoorFlow service</strong>, and the <strong>photo (image) store</strong>, plus whether you&#x27;re signed in and when people last synced. It calls out the exact fix in plain English - most usefully, it distinguishes &quot;DoorFlow reachable but the photo host is blocked&quot; (a firewall/proxy problem that lets names and job titles through but stops photos downloading) from being offline or signed out. It <strong>updates on its own</strong> if connectivity changes while it&#x27;s open (e.g. the internet comes back), and has <strong>Sign In Again</strong>, <strong>Export Diagnostics…</strong>, and <strong>Re-check</strong> buttons.</li>
+<li><strong>Export Diagnostics</strong> (a button in the Connection Doctor) opens a Save dialog and writes a redacted diagnostic snapshot the customer can email to support, saved as a <strong><code>.zip</code></strong> (which is opaque to content-inspection email gateways, so the attachment - full of names, emails and token-shaped strings - isn&#x27;t flagged or stripped in transit); the saved file is then <strong>revealed in Finder/Explorer</strong> so it&#x27;s easy to find. It&#x27;s named after the app with a timestamp (e.g. <code>DoorFlow-Desktop-Diagnostics-2026-08-03-1430.zip</code>). It records the app version + executable path, sign-in state and key event timestamps (token issue/expiry, last sync, last API error), device <strong>clock/skew</strong> (a clock well off real time can break sign-in), Internet / API-host / image-host reachability, local-data health that separates the two real failure modes for missing photos/job titles (photo URL present but not yet cached = a photo-download/network problem, versus no photo URL or job title at all = a data problem), and a <strong>Recent activity</strong> log of the session&#x27;s key events (sync phases, API errors, sign-in changes, and <strong>photo-download failures with their HTTP status</strong> - the usual smoking gun). Tokens are redacted.</li>
+<li><strong>Activity log</strong> - the app now keeps an in-memory log of the session&#x27;s important events (app start, sign-in changes, sync phases and failures, API errors, and photo-download outcomes including the HTTP status of any that fail). It costs nothing on the running app (memory only, no disk writes) and is included in an Export Diagnostics file, so a &quot;sync failed&quot; can be traced to exactly what went wrong.</li>
+<li><strong>About DoorFlow Desktop</strong> window showing the app name, the built version (marketing version + build number), the environment/channel, and copyright. It&#x27;s reached from the <strong>Application menu</strong> on macOS (&quot;About DoorFlow Desktop&quot;), from both the card-printing and Front Desk menu bars.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li>Signing in now always shows the DoorFlow <strong>login screen</strong> instead of silently reusing an existing browser session, so you can choose which account to sign in with (and aren&#x27;t quietly returned to the wrong one).</li>
+<li>A failed sync now explains <strong>what</strong> went wrong instead of a bare &quot;Sync failed&quot;: &quot;No internet connection - can&#x27;t sync&quot; when offline, &quot;Can&#x27;t reach DoorFlow - check your connection&quot; when the service is unreachable, or &quot;Sync couldn&#x27;t complete - some information may be out of date&quot; otherwise. (&quot;Sync failed&quot; read like an app fault when the usual cause is simply no connection.)</li>
+<li><strong>Check for Updates…</strong> has moved from the Help menu into the <strong>Application menu</strong> (macOS), next to About. The Help menu (which only held that one item) has been removed from both menu bars.</li>
+<li>Template editor - dragging a field from the fields picker onto the card is smoother: (1) a plain click now only <em>selects</em> the field - the drag begins only once you actually move the pointer (a small threshold), rather than on selection; (2) the drag shows a clean translucent (~25% <strong>white</strong>) &quot;ghost&quot; of the field at its real drop size and corner radius, with the field name centred in <strong>uppercase</strong> (not bold); (3) the field is grabbed and dropped <strong>centred on the pointer</strong> instead of snapping its top-left to the cursor; and (4) the previewed and dropped objects come from one shared default-object definition (which also fixes the barcode field&#x27;s size differing between drag and drop). <em>(Drag images render at @1× even on HiDPI - a Xojo framework limitation - so the ghost can look slightly soft on Retina.)</em></li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>The app now <strong>refuses a sign-in with a different DoorFlow account</strong> than the one it&#x27;s already set up for, so one account&#x27;s local people, photos and job titles can&#x27;t mix with - or leak to - another account on the same computer. (Proper account switching is planned.)</li>
+<li>Builds now carry a <strong>6-month expiry</strong> (build date + 6 months, stamped at build time). Once a shipped build passes its expiry it stops working and shows an &quot;out of date&quot; screen directing the user to <strong>updates.doorflow.com</strong> to download the latest version - a safety net so very old, potentially-insecure builds don&#x27;t stay in service indefinitely. Debug/IDE runs are never affected, and a mis-stamped/blank expiry fails open (never blocks).</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Cancelling or closing the sign-in window on macOS no longer shows a raw system error (e.g. <em>&quot;…WebAuthenticationSession error 1.&quot;</em>). Cancelling is now silent, and a genuine sign-in problem shows a plain &quot;Sign-in didn&#x27;t complete. Please try again.&quot;</li>
+<li>When you&#x27;re not signed in, the bottom-left status now shows a short, clickable <strong>&quot;Sign in…&quot;</strong> link that starts sign-in, instead of a longer message that could crop unreadably in the fixed-width status area (seen on Windows).</li>
+<li>The card-printing window&#x27;s title bar showed the old <strong>&quot;DoorFlow CardPrint&quot;</strong> name; it now reads <strong>&quot;DoorFlow Desktop&quot;</strong>.</li>
+<li>Person photos now update correctly when someone&#x27;s photo changes in DoorFlow. Previously a changed photo could be missed (the app only checked whether <em>a</em> file was cached, not whether it matched the current photo), and a re-download left the old image behind as an orphaned file. The photo cache now re-downloads when the photo URL changes, deletes the superseded file, records which URL each cached file corresponds to (so it stops re-checking the same people every sync), and refreshes the on-screen photo. Two people who happen to share an identical photo (e.g. the same company logo) no longer overwrite each other&#x27;s cached image - local photo files are now namespaced per person. The diagnostics photo-cache summary now reports people-to-check / downloaded / already-on-disk / failed.</li>
+<li>Template editor: a background sync completing while you were editing a template no longer snaps the editor palette back to its first (Settings) tab. The tab you&#x27;re on is now read from the live tab state rather than a variable that only updated when navigating via code - so clicking the Fields/Info tab directly is remembered, and the post-sync template reload restores it correctly.</li>
+<li>Windows auto-updater no longer offers the version you already have as if it were a newer update. It now compares the running build against the appcast&#x27;s build number (how the feed is published) rather than the marketing version string, so an up-to-date install correctly reports no update available.</li>
+<li>The app now always renders in a light appearance instead of following the system dark-mode setting. On a dark-mode Windows machine the UI (most visibly the Front Desk terminal) had gone almost entirely dark and hard to read, because pure-white backgrounds and pure-black text auto-swap to the system&#x27;s dark colours when dark-mode support is on. Dark-mode support is now off app-wide (<code>Supports Dark Mode</code> build setting), giving a consistent light UI on both platforms.</li>
+</ul>
+<h2>1.9.14</h2>
+<h3>Fixed</h3>
+<ul>
+<li>Searching a people/cards list that matches no-one no longer strands you: previously an empty result switched to the empty-state panel, which hid the search field so you couldn&#x27;t edit or clear your search. A search that returns nothing now keeps the list panel (and the search field) visible, and the card preview shows a friendly &quot;no-one selected&quot; empty state (the same copy as the full empty page) instead of the previously-selected person&#x27;s card, with the Template chooser hidden. The full empty-state panel only shows when the view is genuinely empty (no active search).</li>
+<li>Person photo on the card preview no longer shifts/crops incorrectly (appearing pushed to the left, and moving as you resize the window). The photo&#x27;s crop was being computed from the on-screen frame size instead of the photo&#x27;s own pixels, so it drifted with the canvas scale and varied by photo; it&#x27;s now a stable centred cover-fit. This also makes the printed-card photo framing consistent.</li>
+<li>Incremental (2-minute) sync is now anchored to the DoorFlow server&#x27;s clock from the moment the app launches, closing a window where a device whose clock ran fast could ask the server for changes &quot;since&quot; a time in the future and silently skip recently-updated people. The server-time offset is now measured from the reachability probe (so it&#x27;s known on launch and refreshed every minute) and remembered between launches, instead of resetting until the first data sync of the session.</li>
+</ul>
+<h3>Added</h3>
+<ul>
+<li>Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card <strong>live</strong> as you drag - replacing the modal system picker that only applied the colour after you closed it.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Template editor: an object snapped to a centre guide (the card centre or another object&#x27;s centre) now sits exactly under the guide line - the line is drawn through the object&#x27;s rendered centre, removing the ~1px gap that pixel-rounding otherwise left.</li>
+<li>Template editor: alignment guides no longer flicker between two positions when you hold an object near a snap point - the snap now sticks to its chosen target instead of flipping between near-tied candidates.</li>
+<li>Completing first-run setup now reliably sticks on macOS. CFPreferences batches its disk flush and could drop the completion flag if you quit soon after finishing, restarting the whole wizard; the flag is now also backed by a small marker file that persists immediately, and the marker is retired once the native setting confirms.</li>
+<li>First-run setup is now marked complete as soon as you sign in (rather than only on the final &quot;Open DoorFlow Desktop&quot; button), so quitting during or right after the initial sync no longer restarts the whole first-run wizard on the next launch.</li>
+<li>Deleting the template you&#x27;re editing now moves the editor to the next remaining template (instead of leaving the deleted design on the canvas); if no templates remain, it drops to the All People view.</li>
+<li>Creating a new card template no longer opens to a blank card - a new template is given a valid default orientation, so it renders immediately instead of only after toggling the front/back orientation.</li>
+</ul>
+<h2>1.9.12</h2>
+<h3>Added</h3>
+<ul>
+<li>Template editor: colours (text / border / fill) are now chosen with a built-in colour picker (saturation/value square, hue strip, hex entry, a brightness slider flanked by white/black shortcut swatches) that opens next to the colour square and updates the field and card <strong>live</strong> as you drag - replacing the modal system picker that only applied the colour after you closed it.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Template editor: an object snapped to a centre guide (the card centre or another object&#x27;s centre) now sits exactly under the guide line - the line is drawn through the object&#x27;s rendered centre, removing the ~1px gap that pixel-rounding otherwise left.</li>
+<li>Template editor: alignment guides no longer flicker between two positions when you hold an object near a snap point - the snap now sticks to its chosen target instead of flipping between near-tied candidates.</li>
+<li>Completing first-run setup now reliably sticks on macOS.</li>
+<li>First-run setup is now marked complete as soon as you sign in (rather than only on the final &quot;Open DoorFlow Desktop&quot; button), so quitting during or right after the initial sync no longer restarts the whole first-run wizard on the next launch.</li>
+<li>Deleting the template you&#x27;re editing now moves the editor to the next remaining template (instead of leaving the deleted design on the canvas); if no templates remain, it drops to the All People view.</li>
+<li>Creating a new card template no longer opens to a blank card - a new template is given a valid default orientation, so it renders immediately instead of only after toggling the front/back orientation.</li>
+</ul>
+<h2>1.9.10</h2>
+<h3>Fixed</h3>
+<ul>
+<li>Relaunching now reopens <strong>all</strong> the dashboard windows you had open, each at its saved size, position and view context (the selected list/group or the template that was being edited, and the selected person) - previously only a single window was restored, with no context.</li>
+<li>If you relaunch with fewer screens than when you saved, windows that no longer fit are gathered onto the main screen, neatly cascaded (rather than being dropped).</li>
+<li>The application-lock password window now appears centred on the same display as the dashboard window you were using, instead of at a fixed position.</li>
+<li>Template editor: switching between templates no longer snaps the edit palette back to the SETTINGS tab - it stays on the tab you were using (the palette still reloads for the newly selected template).</li>
+<li>Card readers are no longer mis-detected as card printers. An HID Global OMNIKEY reader was matching the &quot;HID&quot; card-printer family (which exists to catch HID Fargo printers); reader product lines (OMNIKEY, iCLASS, prox, Signo) are now excluded on both macOS and Windows.</li>
+<li>Template editor: alignment guides now line up exactly with a field&#x27;s right and bottom edges (they previously drifted ~1px because the object&#x27;s far edges and the guide were rounded differently); object edges also render pixel-consistent regardless of position.</li>
+<li>Template editor: a selected field&#x27;s resize handles now sit exactly on the corners/edges (previously biased ~½px, most visible on the right and bottom) and draw on top of the field&#x27;s bounding box instead of being painted over by it.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li>Centre- and right-aligned card text now word-wraps to fit the field with each line individually aligned, instead of drifting off to one side when the content is wider than a narrow field.</li>
+<li>Card field values are trimmed of stray leading/trailing whitespace before rendering, so a trailing space in data (e.g. a job title) no longer throws off centre/right alignment.</li>
+</ul>
+<h3>Added</h3>
+<ul>
+<li><strong>Lock Application</strong> menu item (next to Sign In / Sign Out) to lock the app on demand - the same lock as the inactivity policy. Enabled once a lock password has been set.</li>
+<li>Template editor: fields now have a <strong>vertical text alignment</strong> control (top / centre / bottom) alongside the existing horizontal alignment; existing fields keep their current bottom placement.</li>
+<li>Template editor: a selected field&#x27;s corner and edge handles can now be dragged to resize/reshape it (corners resize both axes, edge handles one), with hover cursors and live <strong>alignment guides</strong> that snap a field&#x27;s edge or centre to nearby fields - to the card&#x27;s own centre lines, and to a 30-unit safe margin inside each card edge - as you drag or resize.</li>
+<li><strong>Application lock:</strong> the app now prompts for the password set during first-run - on launch (before the main window is drawn, so there&#x27;s no flash of the UI), and again when you return to it after 5 minutes away. While locked, all other windows are hidden and then restored to their exact positions on unlock; the lock blocks the interface only, so background sync and printing keep running.</li>
+</ul>
+<h2>1.9.9</h2>
+<h3>Added</h3>
+<ul>
+<li><strong>My Account</strong> row in the menu showing the signed-in account name (display-only for now).</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><strong>Sign In</strong> and <strong>Sign Out</strong> are now a single menu item that reflects the current state.</li>
+<li>A person with cards in the print queue is now marked with a &quot;Queued&quot; label in the people list (matching the print queue) instead of an easy-to-miss printer icon.</li>
+<li>Offline mode (for testing) is now enforced across sync, template push, time-drift, IP discovery and all API calls; the network state is logged clearly (<code><em><strong> NETWORK OFFLINE </strong></em></code> / <code>ONLINE</code>). See <code>docs/offline-behaviour.md</code>.</li>
+<li>When offline, network-only menu items (Sign In, Sign Out, Sync Now) are disabled, and the &quot;Open in DoorFlow&quot; card link shows <strong>OFFLINE</strong> in its rollover.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>A token revoked or invalidated server-side now signs the app out (menu returns to &quot;Sign In&quot;, re-auth required) instead of appearing to stay signed in. A refresh that fails only because the app is offline no longer signs you out.</li>
+<li>Template-editor fields no longer nudge out of place when clicked to select them - selecting and dragging are now separate gestures (click to select, then click-drag to move).</li>
+<li>Status labels in the people / print lists (e.g. &quot;Queued&quot;) are now legible on a highlighted row (previously low-contrast on the selection).</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>Sign-in, token refresh, revoke and introspection now authenticate with PKCE and the public client ID only, so no secret ships in the binary.</li>
+</ul>
+<h2>1.9.8</h2>
+<h3>Added</h3>
+<ul>
+<li><strong>My Account</strong> row in the menu showing the signed-in account name (display-only for now).</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><strong>Sign In</strong> and <strong>Sign Out</strong> are now a single menu item that reflects the current state.</li>
+<li>A person with cards in the print queue is now marked with a &quot;Queued&quot; label in the people list (matching the print queue) instead of an easy-to-miss printer icon.</li>
+<li>Offline mode is now enforced across sync, template push, time-drift, IP discovery and all API calls; the network state is logged clearly (<code><em><strong> NETWORK OFFLINE </strong></em></code> / <code>ONLINE</code>). See <code>docs/offline-behaviour.md</code>.</li>
+<li>When offline, network-only menu items (Sign In, Sign Out, Sync Now) are disabled, and the &quot;Open in DoorFlow&quot; card link shows <strong>OFFLINE</strong> in its rollover.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>A token revoked or invalidated server-side now signs the app out (menu returns to &quot;Sign In&quot;, re-auth required) instead of appearing to stay signed in. A refresh that fails only because the app is offline no longer signs you out.</li>
+<li>Template-editor fields no longer nudge out of place when clicked to select them - selecting and dragging are now separate gestures (click to select, then click-drag to move).</li>
+<li>Status labels in the people / print lists (e.g. &quot;Queued&quot;) are now legible on a highlighted row (previously low-contrast on the selection).</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>Sign-in, token refresh, revoke and introspection now authenticate with PKCE and the public client ID only, so no secret ships in the binary.</li>
+</ul>
+<h2>1.9.3</h2>
+<ul>
+<li>The Windows installer is now code-signed with a trusted certificate, so it installs without the &quot;unrecognised app&quot; warning.</li>
+<li>A published SHA-256 checksum lets you verify the download is genuine and untampered.</li>
+</ul>
+<h2>1.9.2</h2>
+<ul>
+<li>Signed with a Developer ID certificate and notarised by Apple, so macOS installs cleanly with no Gatekeeper warnings.</li>
+<li>Universal build that runs natively on both Apple Silicon and Intel Macs.</li>
+<li>Hardened runtime with a stapled notarisation ticket, so it verifies even when offline.</li>
+</ul>
+</main>
+<footer>
+  <div class="inner">
+    <div class="brand">
+      <a href="https://www.doorflow.com/"><img src="/assets/doorflow-mark.svg" alt="DoorFlow"></a>
+      <div class="addr">
+        7 Bell Yard, London, WC2A 2JR, United Kingdom<br>
+        &copy; DoorFlow 2026 &middot; Registered Company No. 06520034
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
