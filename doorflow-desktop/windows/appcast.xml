@@ -3,7 +3,16 @@
   <channel>
     <title>DoorFlow Desktop updates (win)</title>
     <link>https://updates.doorflow.com/doorflow-desktop/windows/appcast.xml</link>
-    <item><title>Version 1.11.2 (75)</title><pubDate>Tue, 04 Aug 2026 10:56:56 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.11.2 (75)&lt;/p&gt;
+    <item><title>Version 1.12.2 (80)</title><pubDate>Tue, 04 Aug 2026 11:26:12 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.12.2 (80)&lt;/p&gt;
+&lt;p&gt;### Security&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The support **factory reset** (hold Option/Alt on the lock screen) now also clears the **cached person photos and template-background images**, not just tokens, prefs, and the database. Previously a reset performed to move a machine to a different DoorFlow account left the previous account&amp;#x27;s face photos on disk. The image folders are recreated empty on the next launch.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;### Fixed&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Exporting diagnostics as a `.zip` failed on Windows because the shell timed out during PowerShell&amp;#x27;s cold start (before the tiny archive was written). The shell timeout is now generous enough for PowerShell to run; the command was hardened (`powershell.exe -ExecutionPolicy Bypass`, success judged by whether the archive actually exists rather than PowerShell&amp;#x27;s unreliable exit code); and if zipping still fails it **falls back to a plain `.txt`** so the export always produces a file.&lt;/li&gt;
+&lt;li&gt;Windows: the **&amp;quot;Template:&amp;quot;** caption above the card preview no longer shows an opaque white box. It was a label layered over the preview canvas, and a transparent label over a canvas doesn&amp;#x27;t render transparently on Windows - so it&amp;#x27;s now drawn directly onto the canvas instead.&lt;/li&gt;
+&lt;/ul&gt;</description><enclosure url="https://github.com/doorflow/doorflow-app-updates.github.io/releases/download/doorflow-desktop-v1.12.2/DoorFlowDesktop-Setup.exe" sparkle:version="80" sparkle:shortVersionString="1.12.2" length="100608784" type="application/octet-stream" sparkle:edSignature="lWA8dm/0j5mqplqobaoSx+qElmoAjLBZ/tG19ZAFl7H1okttJJPxZPqUAEpnldpCVcG61xUCQE/BiysV7DCuBg==" sparkle:os="windows"/></item><item><title>Version 1.11.2 (75)</title><pubDate>Tue, 04 Aug 2026 10:56:56 +0000</pubDate><description>&lt;p&gt;# DoorFlow Desktop 1.11.2 (75)&lt;/p&gt;
 &lt;p&gt;### Added&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;**Connection Doctor** (**Window** menu) - a live checker that actively probes and shows, with green/red status, whether the app can reach the Internet, the **DoorFlow service**, and the **photo (image) store**, plus whether you&amp;#x27;re signed in and when people last synced. It calls out the exact fix in plain English - most usefully, it distinguishes &amp;quot;DoorFlow reachable but the photo host is blocked&amp;quot; (a firewall/proxy problem that lets names and job titles through but stops photos downloading) from being offline or signed out. It **updates on its own** if connectivity changes while it&amp;#x27;s open (e.g. the internet comes back), and has **Sign In Again**, **Export Diagnostics…**, and **Re-check** buttons.&lt;/li&gt;

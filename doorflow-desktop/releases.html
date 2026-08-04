@@ -59,6 +59,26 @@
 <main>
   <a class="back" href="/">&larr; Downloads</a>
   <h1>DoorFlow Desktop release notes</h1>
+<h2>1.12.2</h2>
+<h3>Security</h3>
+<ul>
+<li>The support <strong>factory reset</strong> (hold Option/Alt on the lock screen) now also clears the <strong>cached person photos and template-background images</strong>, not just tokens, prefs, and the database. Previously a reset performed to move a machine to a different DoorFlow account left the previous account&#x27;s face photos on disk. The image folders are recreated empty on the next launch.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Exporting diagnostics as a <code>.zip</code> failed on Windows because the shell timed out during PowerShell&#x27;s cold start (before the tiny archive was written). The shell timeout is now generous enough for PowerShell to run; the command was hardened (<code>powershell.exe -ExecutionPolicy Bypass</code>, success judged by whether the archive actually exists rather than PowerShell&#x27;s unreliable exit code); and if zipping still fails it <strong>falls back to a plain <code>.txt</code></strong> so the export always produces a file.</li>
+<li>Windows: the <strong>&quot;Template:&quot;</strong> caption above the card preview no longer shows an opaque white box. It was a label layered over the preview canvas, and a transparent label over a canvas doesn&#x27;t render transparently on Windows - so it&#x27;s now drawn directly onto the canvas instead.</li>
+</ul>
+<h2>1.12.1</h2>
+<h3>Security</h3>
+<ul>
+<li>The support <strong>factory reset</strong> (hold Option/Alt on the lock screen) now also clears the <strong>cached person photos and template-background images</strong>, not just tokens, prefs, and the database. Previously a reset performed to move a machine to a different DoorFlow account left the previous account&#x27;s face photos on disk. The image folders are recreated empty on the next launch.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Exporting diagnostics as a <code>.zip</code> failed on Windows because the shell timed out during PowerShell&#x27;s cold start (before the tiny archive was written). The shell timeout is now generous enough for PowerShell to run; the command was hardened (<code>powershell.exe -ExecutionPolicy Bypass</code>, success judged by whether the archive actually exists rather than PowerShell&#x27;s unreliable exit code); and if zipping still fails it <strong>falls back to a plain <code>.txt</code></strong> so the export always produces a file.</li>
+<li>Windows: the <strong>&quot;Template:&quot;</strong> caption above the card preview no longer shows an opaque white box. It was a label layered over the preview canvas, and a transparent label over a canvas doesn&#x27;t render transparently on Windows - so it&#x27;s now drawn directly onto the canvas instead.</li>
+</ul>
 <h2>1.11.2</h2>
 <h3>Added</h3>
 <ul>
