@@ -59,6 +59,19 @@
 <main>
   <a class="back" href="/">&larr; Downloads</a>
   <h1>DoorFlow Desktop release notes</h1>
+<h2>1.14.11</h2>
+<h3>Fixed</h3>
+<ul>
+<li><strong>A people sync of a large account no longer aborts on a single network blip.</strong> A big account is fetched a page at a time (~50 people per page, so ~130 pages for 6,400 people); previously <em>any</em> failed page - most often a transient timeout or dropped connection on a busy/proxied network - abandoned the entire run and discarded all progress, which is why a sync would repeatedly &quot;fail after around 600.&quot; Each page is now <strong>retried up to 4 times with backoff (2/4/8/16s)</strong> before the sync gives up, and the retry budget resets on every successful page, so a network that blips once per page can still complete.</li>
+<li><strong>A garbled response, or one bad person record, no longer kills the whole sync.</strong> A page that comes back unparseable (e.g. a proxy returning an HTML error page with a <code>200</code> status) is now <strong>retried</strong> like any other transient page failure instead of failing the sync outright; and a single malformed person record inside an otherwise-valid page is <strong>skipped and logged</strong> rather than abandoning the remaining thousands.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><strong>The people and printed-cards lists are snappier on large accounts.</strong> They now render at most the first <strong>200</strong> people / <strong>500</strong> printed cards instead of building a row for every record (thousands of rows was the dominant cost of opening a list, and nobody scrolls that far). <strong>Search is unchanged and still runs against everyone</strong> - this only limits how many rows are drawn, so anyone is still found by typing a name/email. When a list is capped, the <strong>search box placeholder</strong> shows a &quot;Showing first N - type to search all&quot; hint. Selection and card actions operate on the displayed rows as before. (Also fixed an O(n²) array-growth pattern in all three list builders.)</li>
+<li><strong>Large-account syncs are substantially faster.</strong> Each page of people is now written to the local database in a <strong>single transaction</strong> instead of one disk commit per person - roughly 50× fewer commits per page - which was the dominant cost of a slow sync on a big account. (Internally this required making the database&#x27;s transactions reentrant, using SQLite savepoints, so a single failing record rolls back just itself rather than the whole page.)</li>
+<li><strong>Photo caching now downloads the most-recently-updated people first.</strong> The cache pass is ordered by <code>updated_at</code> (newest first) instead of alphabetically, so freshly-changed and just-added people get their photos before an older backlog - meaning an interrupted or throttled pass still caches the faces a front-desk operator is most likely to need now.</li>
+<li><strong>Photo caching stops hammering an image host that is refusing requests.</strong> When a run of image downloads fails back-to-back (an expired signing scheme, or a corporate proxy/firewall returning <code>403</code>), the cache pass now <strong>stops early</strong> instead of re-attempting the whole failing set (hundreds of images) on every pass, indefinitely, while competing with the people sync. It retries again on the next sync. Any successful download resets the counter, so a few individually-stale URLs don&#x27;t trip it.</li>
+</ul>
 <h2>1.14.9</h2>
 <h3>Fixed</h3>
 <ul>
